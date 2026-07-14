@@ -1,3 +1,4 @@
+import asyncio
 from io import BytesIO
 
 from minio import Minio
@@ -14,8 +15,12 @@ class MinIOStorage:
         if not self._client.bucket_exists(self._bucket):
             self._client.make_bucket(self._bucket)
 
-    def add_photo(self, object_key: str, data: bytes, content_type: str) -> None:
-        self._client.put_object(self._bucket, object_key, bytesIO(data), length=len(data), content_type=content_type)
+    async def add_photo(self, object_key: str, data: bytes, content_type: str) -> None:
+        await asyncio.to_thread(
+            self._client.put_object,
+            self._bucket, object_key, BytesIO(data),
+            length=len(data), content_type=content_type
+        )
 
     def get_photo(self, object_key) -> bytes:
         return self._client.get_object(self._bucket, object_key).read()
