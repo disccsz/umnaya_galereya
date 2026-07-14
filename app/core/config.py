@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     MINIO_ROOT_PASSWORD: str
     MINIO_BUCKET_NAME: str
 
-    # Магия: указываем, откуда брать переменные
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -23,9 +23,6 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> str:
-        """Автоматически собирает строку подключения для SQLAlchemy"""
         return f"postgresql+psycopg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
-# Создаем единственный экземпляр класса. 
-# При первом импорте этого файла Pydantic сам прочитает .env и заполнит поля.
 settings = Settings()
