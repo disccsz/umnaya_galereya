@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 class UploadPhotosResponse(BaseModel):
     status: Literal['pending']
-    photo_ids: list
+    photo_id: str
     message: Literal['Фото приняты в асинхронную обработку'] = 'Фото приняты в асинхронную обработку'
 
 class GetPhotoContentByIDResponse(BaseModel):

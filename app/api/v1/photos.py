@@ -19,10 +19,10 @@ def get_photo_service(session: AsyncSession = Depends(get_session)) -> PhotoServ
     return PhotoService(database=database, storage=storage)
 
 @router.post('/', status_code=status.HTTP_202_ACCEPTED, response_model=UploadPhotosResponse)
-async def upload_photo(file: UploadFile = File(...), service: PhotoService = Depends(get_photo_service)) -> UploadPhotosResponse:
+async def upload_photo(photo: UploadFile = File(...), service: PhotoService = Depends(get_photo_service)) -> UploadPhotosResponse:
 
-    photo = await service.create_photo(file)
-    return UploadPhotosResponse(photo_ids=[photo.id_string], status='pending')
+    photo = await service.create_photo(photo)
+    return UploadPhotosResponse(photo_id=photo.id_string, status='pending')
 
 
 
