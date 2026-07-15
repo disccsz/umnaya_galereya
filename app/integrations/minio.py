@@ -1,5 +1,6 @@
 import asyncio
 from io import BytesIO
+from datetime import timedelta
 
 from minio import Minio
 
@@ -25,5 +26,8 @@ class MinIOStorage:
     def get_photo(self, object_key) -> bytes:
         return self._client.get_object(self._bucket, object_key).read()
 
+    async def get_presigned_url(self, object_key: str, expires=3600) -> str:
+        return await asyncio.to_thread( self._client.presigned_get_object, bucket_name=self._bucket, object_name=object_key, expires=timedelta(seconds=expires) )
+    
 
 storage = MinIOStorage()

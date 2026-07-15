@@ -14,11 +14,12 @@ class Base(DeclarativeBase):
 
 
 class PhotoStatuses(str, enum.Enum):
-    uploaded = 'uploaded'
+    uploading = 'uploading'
     pending = "pending"
     processing = "processing"
     done = "done"
     failed = "failed"
+
 
 
 class Token(Base):
@@ -83,7 +84,7 @@ class Photos(Base):
     load_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     photo_size: Mapped[int] = mapped_column(BigInteger, nullable=False)
 
-    status: Mapped[PhotoStatuses] = mapped_column(Enum(PhotoStatuses, native_enum=True), default=PhotoStatuses.uploaded, nullable=False)
+    status: Mapped[PhotoStatuses] = mapped_column(Enum(PhotoStatuses, native_enum=True), default=PhotoStatuses.uploading, nullable=False)
     attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     last_error_code: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)

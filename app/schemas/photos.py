@@ -8,6 +8,11 @@ class UploadPhotosResponse(BaseModel):
     photo_ids: list
     message: Literal['Фото приняты в асинхронную обработку'] = 'Фото приняты в асинхронную обработку'
 
+class GetPhotoContentByIDResponse(BaseModel):
+    photo_id: str
+    image_preview_url: str | None = None
+    image_url: str | None = None
+
 class GetPhotosByIDResponse(BaseModel):
     photo_id: str
     image_preview_url: str | None = None
@@ -16,16 +21,21 @@ class GetPhotosByIDResponse(BaseModel):
     faces_count: int | None = None
     eyes_closed_count: int | None = None
     is_blurred: bool | None = None
-    blur_score: float | None = None
+    blur_score: int | None = None
     perceptual_hash: str | None = None
     duplicate_group_id: str | None = None
     identity_group_id: str | None = None
     quality_metric: int | None = None
     created_at: datetime
-    updated_at: datetime
+
+class PhotoItem(BaseModel):
+    photo_id: str
+    status: Literal["pending", "processing", "done", "failed"]
+    original_image_url: str | None = None
+    preview_image_url: str | None = None
 
 class GetPhotosListResponse(BaseModel):
-    photo_ids: list
+    photos: list[PhotoItem]
 
 class HealthCheck(BaseModel):
     status: Literal['ok', 'error']

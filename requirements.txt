@@ -6,3 +6,4 @@ SQLAlchemy
 asyncpg
 alembic
 minio
+pydantic-settings

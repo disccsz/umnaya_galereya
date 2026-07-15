@@ -1,0 +1,34 @@
+services:
+  # --- PostgreSQL ---
+  postgres:
+    image: postgres:16-alpine
+    container_name: photo-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: photo_analysis
+    ports:
+      - "5435:5432"  # Внешний порт 5435 -> Внутренний 5432
+    volumes:
+      - pg_data:/var/lib/postgresql/data # Постоянное хранилище данных
+
+  # --- MinIO ---
+  minio:
+    image: minio/minio:latest
+    container_name: photo-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    ports:
+      - "9100:9000"  # S3 API
+      - "9101:9001"  # Web Console
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+
+# Объявляем тома (volumes), чтобы данные не терялись
+volumes:
+  pg_data:
+  minio_data:
