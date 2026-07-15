@@ -1,12 +1,16 @@
 
 import uuid
 
-from fastapi import UploadFile, HTTPException
+from typing import List
+from fastapi import UploadFile, HTTPException, status
 
 from app.integrations.postgreesql import PhotoDatabase
-from app.integrations.minio import storage, MinIOStorage
+from app.integrations.minio import MinIOStorage
 from app.database.models import Photos, PhotoStatuses
 from app.schemas.photos import PhotoItem
+
+from app.core.errors import PhotoNotFoundError, InvalidFile, ErrorCodes
+
 
 class PhotoService:
     def __init__(self, database: PhotoDatabase, storage: MinIOStorage) -> None:
@@ -14,6 +18,10 @@ class PhotoService:
         self._storage = storage
 
     async def create_photo(self, file: UploadFile) -> Photos:
+        if file.size > 3 * 1024 * 1024:
+            raise InvalidFile(file.size)
+        if file.content_type not in ['image/jpeg', 'image/png', 'image/jpg']:
+            raise InvalidFile(file.content_type)
         data = await file.read()
 
         photo_id = f"p_{uuid.uuid4().hex[:12]}"
@@ -35,7 +43,6 @@ class PhotoService:
         for photo in photos:
             if photo.status != PhotoStatuses.uploading:
                 photo_data = {'photo_id': photo.id_string, 'status': photo.status}
-                print(photo.object_key)
             
                 original_photo_url = await self._storage.get_presigned_url(object_key=photo.object_key)
                 photo_data['original_image_url'] = original_photo_url
@@ -50,7 +57,7 @@ class PhotoService:
         photo = await self._database.get_photo_by_id(string_id=string_id)
 
         if not photo:
-            raise HTTPException(status_code=404, detail="Photo not found")
+            raise PhotoNotFoundError(photo_id=string_id)
 
         photo_data = {'photo_id': photo.id_string, 'status': photo.status,'created_at': photo.load_time}
 
@@ -59,7 +66,7 @@ class PhotoService:
     async def get_photo_content_by_id(self, string_id: str) -> Photos:
         photo = await self._database.get_photo_by_id(string_id=string_id)
         if not photo:
-            raise HTTPException(status_code=404, detail="Photo not found")
+            raise PhotoNotFoundError(photo_id=string_id)
         original_photo_url, preview_photo_url = None, None
         if photo.object_key:
             original_photo_url = await self._storage.get_presigned_url(object_key=photo.object_key)

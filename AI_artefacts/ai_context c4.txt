@@ -1,0 +1,39 @@
+flowchart TB
+    classDef client fill:#FCE5CD,stroke:#D9A441,stroke-width:2px,color:#000
+    classDef service fill:#F9CB9C,stroke:#E69138,stroke-width:2px,color:#000
+    classDef storage fill:#BDD7EE,stroke:#6C8EBF,stroke-width:2px,color:#000
+    classDef analyzer fill:#FFD966,stroke:#BF9000,stroke-width:2px,color:#000
+
+    VK["Клиент VK Mini App (React)<br/>(передаётся идентификатор пользователя,<br/>запустившего приложение vk_user_id (int)<br/>и sign (int) base64 — подпись параметров запуска)"]:::client
+    CURL["Клиент curl/Postman/swagger"]:::client
+
+    VAL["Валидация данных"]:::service
+    ROUTE["Маршрутизация и вызов модулей"]:::service
+
+    MINIO["MinIO"]:::storage
+    PG["PostgreSQL"]:::storage
+
+    Q1["Очередь фото на обработку"]:::storage
+    Q2["Очередь фото с упавшим анализатором"]:::storage
+
+    W1["Чтение и отправка анализатору задачи<br/>из очереди, получение разметки"]:::service
+    W2["Хеширование, применение логики<br/>определения дубликатов и группировки,<br/>сжатие оригинала до лёгкого превью<br/>и сохранение, смена статуса фото на done"]:::service
+
+    ANA["Analyzer Python<br/>Получение фото из MinIO, анализ<br/>и возвращение разметки"]:::analyzer
+
+    VK -->|"Запрос/ответ HTTP (RESTful API)"| ROUTE
+    CURL -->|"Запрос/ответ HTTP (RESTful API)"| ROUTE
+
+    ROUTE -.->|"Загрузка в хранилище"| MINIO
+    ROUTE -.->|"Отправка задачи в очередь"| Q1
+    ROUTE <-->|"Сохранение и получение информации<br/>о владельце, метаданных фото"| PG
+
+    Q1 -.->|"callback consume"| W1
+    Q2 -.->|"callback consume"| W1
+
+    W1 <-->|"Вызов модуля (gRPC)"| ANA
+
+    W1 -.->|"Получение фото из хранилища"| MINIO
+    W2 -.->|"Сохранение превью"| MINIO
+
+    W2 -.->|"Сохранение результата,<br/>изменение статусов, группировка"| PG
