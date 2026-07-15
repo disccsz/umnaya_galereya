@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     MINIO_ROOT_PASSWORD: str
     MINIO_BUCKET_NAME: str
 
+    # --- Logging ---
+    LOG_LEVEL: str = "INFO"
+    DB_ECHO: bool = False
 
     model_config = SettingsConfigDict(
         env_file=".env",

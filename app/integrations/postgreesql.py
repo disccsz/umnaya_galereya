@@ -1,8 +1,14 @@
+import logging
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models import Photos
-from app.core.errors import DatabaseError, ErrorCodes
+from app.core.errors import DatabaseError, ErrorCodes, PhotoNotFoundError, AppException
+
+
+logger = logging.getLogger(__name__)
+
 
 class PhotoDatabase:
     def __init__(self, session: AsyncSession):
@@ -15,24 +21,30 @@ class PhotoDatabase:
             await self._session.refresh(photo)
             return photo
         except Exception as e:
+            logger.error("Database create failed", exc_info=True)
             raise DatabaseError(cause=str(e), code=ErrorCodes.DATABASE_CANT_CREATE)
-
 
     async def list(self) -> list[Photos]:
         try:
-                
-            result = await self._session.execute(select(Photos).order_by(Photos.load_time.desc()))
+            result = await self._session.execute(
+                select(Photos).order_by(Photos.load_time.desc())
+            )
             return list(result.scalars().all())
         except Exception as e:
-            raise DatabaseError(cause=str(e), code=ErrorCodes.DATABASE_CANT_EXECUTE)    
-        
+            logger.error("Database list failed", exc_info=True)
+            raise DatabaseError(cause=str(e), code=ErrorCodes.DATABASE_CANT_EXECUTE)
+
     async def get_photo_by_id(self, string_id: str) -> Photos:
         try:
-            result = await self._session.execute(select(Photos).where(Photos.id_string==string_id).limit(1))
-            result = result.scalars().first()
-            return result
+            result = await self._session.execute(
+                select(Photos).where(Photos.id_string == string_id).limit(1)
+            )
+            return result.scalars().first()
         except Exception as e:
-            raise DatabaseError(cause=str(e), code=ErrorCodes.DATABASE_CANT_EXECUTE)  
+            logger.error(
+                "Database get_photo_by_id failed: %s", string_id, exc_info=True,
+            )
+            raise DatabaseError(cause=str(e), code=ErrorCodes.DATABASE_CANT_EXECUTE)
 
     async def update_status(self, photo_id: int, status: str) -> Photos:
         try:
@@ -42,7 +54,11 @@ class PhotoDatabase:
             photo.status = status
             await self._session.commit()
             return photo
-        except AppException:  # пробрасываем PhotoNotFoundError
+        except AppException:
             raise
         except Exception as e:
+            logger.error(
+                "Database update_status failed: id=%s, status=%s",
+                photo_id, status, exc_info=True,
+            )
             raise DatabaseError(cause=str(e), code=ErrorCodes.DATABASE_CANT_GET) from e
