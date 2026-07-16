@@ -80,6 +80,7 @@ class PhotoService:
             'status': photo.status,
             'created_at': photo.load_time,
         }
+
         return photo_data
 
     async def get_photo_content_by_id(self, string_id: str) -> Photos:

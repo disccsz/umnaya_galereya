@@ -15,14 +15,11 @@ class GetPhotoContentByIDResponse(BaseModel):
 
 class GetPhotosByIDResponse(BaseModel):
     photo_id: str
-    image_preview_url: str | None = None
-    image_url: str | None = None
     status: Literal["pending", "processing", "done", "failed"]
     faces_count: int | None = None
     eyes_closed_count: int | None = None
     is_blurred: bool | None = None
     blur_score: int | None = None
-    perceptual_hash: str | None = None
     duplicate_group_id: str | None = None
     identity_group_id: str | None = None
     quality_metric: int | None = None
