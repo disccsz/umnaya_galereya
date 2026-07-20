@@ -27,6 +27,10 @@ setup_logging()
 
 app = FastAPI(title="Photo Service", version="0.1.0", lifespan=lifespan)
 
+from app.api.v1.healthz import router as health_router
+
+app.include_router(health_router)    # без префикса — ручка будет /healthz
+
 app.include_router(router)
 
 
