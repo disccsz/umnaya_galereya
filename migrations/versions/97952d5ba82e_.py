@@ -1,8 +1,8 @@
-"""initial schema
+"""empty message
 
-Revision ID: afae4739717a
+Revision ID: 97952d5ba82e
 Revises: 
-Create Date: 2026-07-15 00:27:35.748806
+Create Date: 2026-07-20 14:20:38.815450
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'afae4739717a'
+revision: str = '97952d5ba82e'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -50,7 +50,7 @@ def upgrade() -> None:
     sa.Column('preview_key', sa.String(length=500), nullable=True),
     sa.Column('load_time', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('photo_size', sa.BigInteger(), nullable=False),
-    sa.Column('status', sa.Enum('uploaded', 'pending', 'processing', 'done', 'failed', name='photostatuses'), nullable=False),
+    sa.Column('status', sa.Enum('uploading', 'pending', 'processing', 'done', 'failed', name='photostatuses'), nullable=False),
     sa.Column('attempts', sa.Integer(), nullable=False),
     sa.Column('last_error_code', sa.Integer(), nullable=True),
     sa.Column('last_error_message', sa.String(length=1000), nullable=True),
