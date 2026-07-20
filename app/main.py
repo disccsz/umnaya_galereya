@@ -12,15 +12,22 @@ from app.api.v1.photos import router
 
 from contextlib import asynccontextmanager
 from app.integrations.minio import MinIOStorage
-
+from app.integrations.kafka import KafkaProducer
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     storage = MinIOStorage()
+    kafka = KafkaProducer()
+
     await storage.startup()
+    await kafka.startup()
+
     app.state.storage = storage
+    app.state.kafka = kafka
+    
     yield
-    await storage.shutdown() 
+    await storage.shutdown()
+    await kafka.shutdown() 
 
 
 logger = logging.getLogger(__name__)

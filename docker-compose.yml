@@ -60,9 +60,14 @@ services:
     ports:
       - "8000:8000"
     depends_on:
+      - kafka
       - postgres
       - minio
     environment:
+      SERVICE_TIMEOUT: 10
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_SASL_USERNAME: photo-api
+      KAFKA_SASL_PASSWORD: photo-api-secret
       DB_USER: postgres
       DB_PASSWORD: postgres
       DB_HOST: postgres                # имя сервиса

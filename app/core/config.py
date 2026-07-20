@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     MINIO_BUCKET_NAME: str
     MINIO_PUBLIC_URL: str = ""
 
+    # --- Kafka ---
+    KAFKA_BOOTSTRAP_SERVERS: str 
+    KAFKA_SASL_USERNAME: str
+    KAFKA_SASL_PASSWORD: str 
     # --- Logging ---
     LOG_LEVEL: str = "INFO"
     DB_ECHO: bool = False
