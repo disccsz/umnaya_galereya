@@ -1,6 +1,2 @@
 __pycache__/
-.*
-!.gitignore
-!.git
-!.proto
-!.env.example
+.env

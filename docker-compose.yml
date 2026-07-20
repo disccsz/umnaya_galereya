@@ -28,6 +28,28 @@ services:
       - minio_data:/data
     command: server /data --console-address ":9001"
 
+  api:
+    build: .
+    container_name: photo-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - minio
+    environment:
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: postgres                # имя сервиса
+      DB_PORT: 5432                     # внутренний порт postgres
+      DB_NAME: photo_analysis
+      MINIO_ENDPOINT: minio:9000       # имя сервиса + S3 API порт
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+      MINIO_BUCKET_NAME: photo-bucket
+      LOG_LEVEL: INFO
+      DB_ECHO: "false"
+
 # Объявляем тома (volumes), чтобы данные не терялись
 volumes:
   pg_data:
