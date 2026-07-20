@@ -13,10 +13,13 @@ class Settings(BaseSettings):
     MINIO_ROOT_USER: str
     MINIO_ROOT_PASSWORD: str
     MINIO_BUCKET_NAME: str
+    MINIO_PUBLIC_URL: str = ""
 
     # --- Logging ---
     LOG_LEVEL: str = "INFO"
     DB_ECHO: bool = False
+
+    SERVICE_TIMEOUT: int
 
     model_config = SettingsConfigDict(
         env_file=".env",

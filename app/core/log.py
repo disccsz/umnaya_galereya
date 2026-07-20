@@ -2,11 +2,12 @@ import logging
 import sys
 
 from app.core.config import settings
+from app.core.context import request_id_var
 
 
 class RequestIDFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
-        record.request_id = getattr(record, 'request_id', '-')
+        record.request_id = request_id_var.get()
         return True
 
 

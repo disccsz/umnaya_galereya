@@ -47,6 +47,7 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin123
       MINIO_BUCKET_NAME: photo-bucket
+      MINIO_PUBLIC_URL: localhost:9100
       LOG_LEVEL: INFO
       DB_ECHO: "false"
 
