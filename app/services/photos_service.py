@@ -1,5 +1,7 @@
 import uuid
 import logging
+import json
+from app.integrations.kafka import KafkaProducer, TOPIC_PHOTO_UPLOADED
 
 from typing import List
 from fastapi import UploadFile
@@ -15,9 +17,10 @@ logger = logging.getLogger(__name__)
 
 
 class PhotoService:
-    def __init__(self, database: PhotoDatabase, storage: MinIOStorage) -> None:
+    def __init__(self, database: PhotoDatabase, storage: MinIOStorage, kafka: KafkaProducer | None = None) -> None:
         self._database = database
         self._storage = storage
+        self._kafka = kafka
 
     async def create_photo(self, file: UploadFile) -> Photos:
         if file.size and file.size > 3 * 1024 * 1024:
@@ -37,9 +40,22 @@ class PhotoService:
             photo_size=len(data), status=PhotoStatuses.uploading,
         )
 
+        
+
         photo = await self._database.create(photo)
         await self._storage.add_photo(object_key, data, file.content_type or "application/octet-stream")
+
+        if self._kafka:
+            await self._kafka.send(
+                topic=TOPIC_PHOTO_UPLOADED,
+                key=photo_id.encode(),
+                value=json.dumps({"photo_id": photo_id, "object_key": object_key}).encode(),
+            )
+
         photo = await self._database.update_status(photo_id=photo.id, status=PhotoStatuses.pending)
+
+        
+
 
         logger.info(
             "Photo created: id=%s, size=%s", photo.id_string, len(data),

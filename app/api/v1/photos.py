@@ -16,7 +16,8 @@ router = APIRouter(prefix='/api/v1/photos')
 def get_photo_service(request: Request, session: AsyncSession = Depends(get_session)) -> PhotoService:
     database = PhotoDatabase(session)
     storage = request.app.state.storage
-    return PhotoService(database=database, storage=storage)
+    kafka = request.app.state.kafka
+    return PhotoService(database=database, storage=storage, kafka=kafka)
 
 @router.post('/', status_code=status.HTTP_202_ACCEPTED, response_model=UploadPhotosResponse)
 async def upload_photo(photo: UploadFile = File(...), service: PhotoService = Depends(get_photo_service)) -> UploadPhotosResponse:
