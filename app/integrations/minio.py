@@ -13,25 +13,33 @@ logger = logging.getLogger(__name__)
 
 
 class MinIOStorage:
-    def __init__(self) -> None:
-        self._client = Minio(
+    def __init__(self) -> None:           
+        self._bucket = settings.MINIO_BUCKET_NAME
+        self._client: Minio | None = None
+
+    async def startup(self) -> None:       # вызывается один раз в lifespan
+        self._client = await asyncio.to_thread(
+            Minio,
             settings.MINIO_ENDPOINT,
             access_key=settings.MINIO_ROOT_USER,
             secret_key=settings.MINIO_ROOT_PASSWORD,
             secure=False,
         )
-        self._bucket = settings.MINIO_BUCKET_NAME
-        self._ensure_bucket()
+        await self._ensure_bucket()
 
-    def _ensure_bucket(self):
-        try:
+    async def shutdown(self) -> None:    
+        if self._client:
+            self._client = None
+
+    async def _ensure_bucket(self):
+        def _sync():
             if not self._client.bucket_exists(self._bucket):
                 self._client.make_bucket(self._bucket)
+        try:
+            await asyncio.to_thread(_sync)
         except Exception as e:
-            logger.critical(
-                "MinIO bucket check failed", exc_info=True,
-            )
-            raise StorageError(cause=str(e), code=ErrorCodes.STORAGE_UNAVAILABLE)
+            logger.critical("MinIO ensure_bucket failed")
+            raise StorageError(cause=str(e), code=ErrorCodes.BUCKET_ERROR)
 
     async def add_photo(self, object_key: str, data: bytes, content_type: str) -> None:
         try:

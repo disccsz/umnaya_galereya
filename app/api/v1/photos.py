@@ -1,11 +1,10 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Request
 from fastapi.responses import Response
 from fastapi import UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
 from app.database.database import get_session
-from app.integrations.minio import MinIOStorage
 from app.integrations.postgreesql import PhotoDatabase
 from app.schemas.photos import UploadPhotosResponse, GetPhotosListResponse, GetPhotosByIDResponse, GetPhotoContentByIDResponse, PhotoItem
 from app.services.photos_service import PhotoService
@@ -13,9 +12,10 @@ from app.services.photos_service import PhotoService
 
 router = APIRouter(prefix='/api/v1/photos')
 
-def get_photo_service(session: AsyncSession = Depends(get_session)) -> PhotoService:
+
+def get_photo_service(request: Request, session: AsyncSession = Depends(get_session)) -> PhotoService:
     database = PhotoDatabase(session)
-    storage = MinIOStorage()
+    storage = request.app.state.storage
     return PhotoService(database=database, storage=storage)
 
 @router.post('/', status_code=status.HTTP_202_ACCEPTED, response_model=UploadPhotosResponse)

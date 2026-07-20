@@ -8,12 +8,24 @@ from app.core.errors import AppException, ErrorResponse, ErrorDetail
 from app.core.log import setup_logging
 from app.api.v1.photos import router
 
+from contextlib import asynccontextmanager
+from app.integrations.minio import MinIOStorage
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    storage = MinIOStorage()
+    await storage.startup()
+    app.state.storage = storage
+    yield
+    await storage.shutdown() 
+
 
 logger = logging.getLogger(__name__)
 
 setup_logging()
 
-app = FastAPI(title="Photo Service", version="0.1.0")
+app = FastAPI(title="Photo Service", version="0.1.0", lifespan=lifespan)
 
 app.include_router(router)
 
