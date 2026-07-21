@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from app.core.config import settings
@@ -11,6 +12,55 @@ from app.worker import preview
 logger = logging.getLogger(__name__)
 
 MAX_RETRIES = 5
+RETRY_DELAYS = [10, 15, 20, 25]  # seconds, 4 retries for analyzer calls
+
+
+async def _call_analyzer_with_retry(
+    photo_id: str,
+    object_key: str,
+    image_bytes: bytes,
+):
+    last_error = None
+    for attempt in range(len(RETRY_DELAYS) + 1):
+        try:
+            return await grpc_client.analyze(
+                photo_id=photo_id, object_key=object_key, image_bytes=image_bytes,
+            )
+        except Exception as e:
+            last_error = e
+            if attempt < len(RETRY_DELAYS):
+                delay = RETRY_DELAYS[attempt]
+                logger.warning(
+                    "Analyzer call failed (attempt %d), retrying in %ds: %s",
+                    attempt + 1, delay, e,
+                )
+                await asyncio.sleep(delay)
+    logger.error("Analyzer call failed after all retries: %s", last_error)
+    return None
+
+
+async def _check_photo_identity(photo_id: int, sha256_hash: str, owner_token: str | None) -> None:
+    group_id = await db.find_identity_group_by_sha256(sha256_hash, exclude_photo_id=photo_id)
+    if group_id is not None:
+        await db.assign_identity_group(photo_id, group_id)
+        logger.info("Photo %s assigned to identity group %d", photo_id, group_id)
+    else:
+        group_id = await db.create_group(True, sha256_hash, owner_token)
+        await db.assign_identity_group(photo_id, group_id)
+        logger.info("Created identity group %d for photo %s", group_id, photo_id)
+
+
+async def _check_photo_duplicates(photo_id: int, perceptual_hash: str, owner_token: str | None) -> None:
+    group_id = await db.find_duplicate_group_by_phash(
+        perceptual_hash, 20, exclude_photo_id=photo_id,
+    )
+    if group_id is not None:
+        await db.assign_duplicate_group(photo_id, group_id)
+        logger.info("Photo %s assigned to duplicate group %d", photo_id, group_id)
+    else:
+        group_id = await db.create_group(False, perceptual_hash, owner_token)
+        await db.assign_duplicate_group(photo_id, group_id)
+        logger.info("Created duplicate group %d for photo %s", group_id, photo_id)
 
 
 async def process_message(photo_id: str, object_key: str, msg) -> None:
@@ -28,9 +78,17 @@ async def process_message(photo_id: str, object_key: str, msg) -> None:
 
         image_data = await minio_client.read(object_key)
 
-        analysis = await grpc_client.analyze(
+        analysis = await _call_analyzer_with_retry(
             photo_id=photo_id, object_key=object_key, image_bytes=image_data,
         )
+        if analysis is None:
+            await db.update_status(
+                photo.id, PhotoStatuses.failed,
+                attempts=attempts,
+                last_error_message="Analyzer unavailable after all retries",
+            )
+            logger.warning("Photo %s moved to failed (analyzer down)", photo_id)
+            return
 
         sha256 = hasher.sha256(image_data)
         phash = hasher.perceptual(image_data)
@@ -56,6 +114,16 @@ async def process_message(photo_id: str, object_key: str, msg) -> None:
         )
 
         logger.info("Photo %s processed successfully", photo_id)
+
+        try:
+            await _check_photo_identity(photo.id, sha256, photo.owner_data_token)
+        except Exception as e:
+            logger.error("Identity check failed for photo %s: %s", photo_id, e, exc_info=True)
+        try:
+            if phash is not None:
+                await _check_photo_duplicates(photo.id, phash, photo.owner_data_token)
+        except Exception as e:
+            logger.error("Duplicate check failed for photo %s: %s", photo_id, e, exc_info=True)
 
     except Exception as e:
         logger.error("Photo %s processing failed: %s", photo_id, e, exc_info=True)

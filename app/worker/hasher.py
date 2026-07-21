@@ -26,3 +26,7 @@ def perceptual(data: bytes) -> str | None:
     except Exception as e:
         logger.warning("Perceptual hash failed: %s", e)
         return None
+
+
+def hamming_distance(hash1: str, hash2: str) -> int:
+    return (int(hash1, 16) ^ int(hash2, 16)).bit_count()
