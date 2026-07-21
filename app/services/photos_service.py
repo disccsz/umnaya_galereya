@@ -11,6 +11,7 @@ from app.integrations.minio import MinIOStorage
 from app.database.models import Photos, PhotoStatuses
 from app.schemas.photos import PhotoItem
 from app.core.errors import PhotoNotFoundError, InvalidFile, FileTooLarge
+from app.core.metrics import photos_uploaded_total
 
 
 logger = logging.getLogger(__name__)
@@ -73,6 +74,7 @@ class PhotoService:
         logger.info(
             "Photo created: id=%s, size=%s", photo.id_string, len(data),
         )
+        photos_uploaded_total.inc()
         return photo
 
     async def list_photos(self) -> List[PhotoItem]:

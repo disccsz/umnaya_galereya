@@ -11,10 +11,12 @@ from app.core.log import setup_logging
 from app.core.context import request_id_var
 from app.api.v1.photos import router
 from app.api.v1.groups import router as groups_router
+from app.api.v1.metrics import router as metrics_router
 
 from contextlib import asynccontextmanager
 from app.integrations.minio import MinIOStorage
 from app.integrations.kafka import KafkaProducer
+from app.core.metrics import http_requests_total, http_request_duration_seconds
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -53,6 +55,7 @@ app.include_router(health_router)    # без префикса — ручка б
 
 app.include_router(router)
 app.include_router(groups_router)
+app.include_router(metrics_router)
 
 @app.middleware("http")
 async def cors_pna(request: Request, call_next):
@@ -73,6 +76,16 @@ async def log_requests(request: Request, call_next):
 
     logger.info("%s %s → %s (%sms)", request.method, request.url.path, response.status_code, duration_ms)
     response.headers["X-Request-ID"] = request_id
+
+    http_requests_total.labels(
+        method=request.method, path=request.url.path,
+        status_code=response.status_code,
+    ).inc()
+    http_request_duration_seconds.labels(
+        method=request.method, path=request.url.path,
+        status_code=response.status_code,
+    ).observe(duration_ms / 1000)
+
     return response
 
 @app.exception_handler(AppException)

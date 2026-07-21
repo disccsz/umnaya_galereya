@@ -8,6 +8,7 @@ from minio import Minio
 
 from app.core.config import settings
 from app.core.errors import StorageError, ErrorCodes
+from app.core.metrics import storage_upload_errors_total
 
 
 logger = logging.getLogger(__name__)
@@ -32,6 +33,7 @@ class MinIOStorage:
             )
         except asyncio.TimeoutError:
             logger.critical("MinIO client creation timed out after %ss", settings.SERVICE_TIMEOUT)
+            storage_upload_errors_total.labels(error_code=ErrorCodes.STORAGE_TIMEOUT).inc()
             raise StorageError(cause="timeout", code=ErrorCodes.STORAGE_TIMEOUT)
         await self._ensure_bucket()
 
@@ -50,9 +52,11 @@ class MinIOStorage:
             )
         except asyncio.TimeoutError:
             logger.critical("MinIO ensure_bucket timed out after %ss", settings.SERVICE_TIMEOUT)
+            storage_upload_errors_total.labels(error_code=ErrorCodes.STORAGE_TIMEOUT).inc()
             raise StorageError(cause="timeout", code=ErrorCodes.STORAGE_TIMEOUT)
         except Exception as e:
             logger.critical("MinIO ensure_bucket failed")
+            storage_upload_errors_total.labels(error_code=ErrorCodes.BUCKET_ERROR).inc()
             raise StorageError(cause=str(e), code=ErrorCodes.BUCKET_ERROR)
 
     async def add_photo(self, object_key: str, data: bytes, content_type: str) -> None:
@@ -69,11 +73,13 @@ class MinIOStorage:
             logger.error(
                 "MinIO put_object timed out after %ss: %s", settings.SERVICE_TIMEOUT, object_key,
             )
+            storage_upload_errors_total.labels(error_code=ErrorCodes.STORAGE_TIMEOUT).inc()
             raise StorageError(cause="timeout", code=ErrorCodes.STORAGE_TIMEOUT)
         except Exception as e:
             logger.error(
                 "MinIO put_object failed: %s", object_key, exc_info=True,
             )
+            storage_upload_errors_total.labels(error_code=ErrorCodes.PHOTO_NOT_ADD_TO_STORAGE).inc()
             raise StorageError(cause=str(e), code=ErrorCodes.PHOTO_NOT_ADD_TO_STORAGE)
 
     def get_photo(self, object_key: str) -> bytes:
@@ -104,9 +110,11 @@ class MinIOStorage:
             logger.error(
                 "MinIO presigned URL timed out after %ss: %s", settings.SERVICE_TIMEOUT, object_key,
             )
+            storage_upload_errors_total.labels(error_code=ErrorCodes.STORAGE_TIMEOUT).inc()
             raise StorageError(cause="timeout", code=ErrorCodes.STORAGE_TIMEOUT)
         except Exception as e:
             logger.error(
                 "MinIO presigned URL failed: %s", object_key, exc_info=True,
             )
+            storage_upload_errors_total.labels(error_code=ErrorCodes.PHOTO_URL_NOT_TAKEN).inc()
             raise StorageError(cause=str(e), code=ErrorCodes.PHOTO_URL_NOT_TAKEN)

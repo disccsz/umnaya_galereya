@@ -6,6 +6,7 @@ from aiokafka.admin import AIOKafkaAdminClient, NewTopic
 from aiokafka.errors import KafkaConnectionError
 
 from app.core.config import settings
+from app.core.metrics import kafka_publish_errors_total
 
 
 logger = logging.getLogger(__name__)
@@ -60,6 +61,7 @@ class KafkaProducer:
             )
         except asyncio.TimeoutError:
             logger.error("Kafka send timed out after %ss", settings.SERVICE_TIMEOUT)
+            kafka_publish_errors_total.labels(topic=topic).inc()
             raise KafkaConnectionError("Kafka send timed out")
 
     async def shutdown(self):
