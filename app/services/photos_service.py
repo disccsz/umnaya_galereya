@@ -20,17 +20,31 @@ class PhotoService:
         self._storage = storage
 
     async def create_photo(self, file: UploadFile) -> Photos:
-        if file.size and file.size > 3 * 1024 * 1024:
-            logger.warning("File too large: %s", file.size)
+        MAX_SIZE = 3 * 1024 * 1024
+        if file.size and file.size > MAX_SIZE:
+            logger.warning("File too large by header: %s", file.size)
             raise FileTooLarge(size=file.size)
         if file.content_type not in ['image/jpeg', 'image/png', 'image/jpg']:
             logger.warning("Invalid file type: %s", file.content_type)
             raise InvalidFile(content_type=file.content_type)
 
-        data = await file.read()
+        data = await file.read(MAX_SIZE + 1)
+        if len(data) > MAX_SIZE:
+            logger.warning("File too large: %s", len(data))
+            raise FileTooLarge(size=len(data))
 
+        _MAGIC = {
+            "image/jpeg": (b"\xff\xd8\xff",),
+            "image/png":  (b"\x89PNG\r\n\x1a\n",),
+            "image/jpg":  (b"\xff\xd8\xff",),
+        }
+        if not data.startswith(_MAGIC[file.content_type]):
+            logger.warning("File content does not match declared type: %s", file.content_type)
+            raise InvalidFile(content_type=file.content_type)
+
+        _EXT = {"image/jpeg": "jpg", "image/png": "png", "image/jpg": "jpg"}
         photo_id = f"p_{uuid.uuid4().hex[:12]}"
-        object_key = f"photos/{photo_id}/original.jpg"
+        object_key = f"photos/{photo_id}/original.{_EXT[file.content_type]}"
 
         photo = Photos(
             id_string=photo_id, object_key=object_key,
