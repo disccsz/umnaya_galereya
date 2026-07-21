@@ -8,6 +8,12 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: photo_analysis
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
     ports:
       - "5435:5432"  # Внешний порт 5435 -> Внутренний 5432
     volumes:
@@ -76,9 +82,12 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - kafka
-      - postgres
-      - minio
+      kafka:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
     environment:
       SERVICE_TIMEOUT: 10
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
@@ -100,9 +109,12 @@ services:
     container_name: photo-worker
     restart: unless-stopped
     depends_on:
-      - kafka
-      - postgres
-      - minio
+      kafka:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
     environment:
       SERVICE_TIMEOUT: 30
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
