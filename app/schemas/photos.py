@@ -15,7 +15,7 @@ class GetPhotoContentByIDResponse(BaseModel):
 
 class GetPhotosByIDResponse(BaseModel):
     photo_id: str
-    status: Literal["pending", "processing", "done", "failed"]
+    status: Literal["uploading", "pending", "processing", "done", "failed"]
     faces_count: int | None = None
     eyes_closed_count: int | None = None
     is_blurred: bool | None = None
@@ -27,7 +27,7 @@ class GetPhotosByIDResponse(BaseModel):
 
 class PhotoItem(BaseModel):
     photo_id: str
-    status: Literal["pending", "processing", "done", "failed"]
+    status: Literal['uploading', "pending", "processing", "done", "failed"]
     original_image_url: str | None = None
     preview_image_url: str | None = None
 

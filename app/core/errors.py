@@ -95,16 +95,6 @@ class FileTooLarge(AppException):
             details={'content size must be under': '3 mb'},
         )
 
-
-class FileTooLargeError(AppException):
-    def __init__(self, size: int, max_size: int):
-        super().__init__(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            code=ErrorCodes.FILE_TOO_LARGE,
-            message=f"File too large: {size} bytes (max {max_size})",
-            details={"file_size": size, "max_size": max_size},
-        )
-
 class DatabaseError(AppException):
     def __init__(self, cause: str, code: ErrorCodes = ErrorCodes.DATABASE_ERROR):
         super().__init__(
