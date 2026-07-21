@@ -17,10 +17,15 @@ from app.integrations.minio import MinIOStorage
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     storage = MinIOStorage()
+
     await storage.startup()
+
+
     app.state.storage = storage
+
+    
     yield
-    await storage.shutdown() 
+    await storage.shutdown()
 
 
 logger = logging.getLogger(__name__)
@@ -29,12 +34,13 @@ setup_logging()
 
 app = FastAPI(title="Photo Service", version="0.1.0", lifespan=lifespan)
 
+from app.api.v1.readyz import router as ready_router
 from app.api.v1.healthz import router as health_router
 
+app.include_router(ready_router) 
 app.include_router(health_router)    # без префикса — ручка будет /healthz
 
 app.include_router(router)
-
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
@@ -51,7 +57,6 @@ async def log_requests(request: Request, call_next):
     response.headers["X-Request-ID"] = request_id
     return response
 
-
 @app.exception_handler(AppException)
 async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
     request_id = request_id_var.get()
@@ -61,7 +66,6 @@ async def app_exception_handler(request: Request, exc: AppException) -> JSONResp
         status_code=exc.status_code,
         content=error_response.model_dump(mode="json"),
     )
-
 
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
