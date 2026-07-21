@@ -43,6 +43,7 @@ async def save_analysis(
     eyes_closed_count: int | None = None,
     is_blurred: bool | None = None,
     blur_score: float | None = None,
+    quality_metric: int | None = None,
     perceptual_hash: str | None = None,
     sha256_hash: str | None = None,
     dominant_color: str | None = None,
@@ -56,6 +57,7 @@ async def save_analysis(
             eyes_closed_count=eyes_closed_count,
             is_blurred=is_blurred,
             blur_score=blur_score,
+            quality_metric=quality_metric,
             perceptual_hash=perceptual_hash,
             sha256_hash=sha256_hash,
             dominant_color=dominant_color,
@@ -83,38 +85,40 @@ async def update_photo_after_analysis(
         await session.commit()
 
 
-async def find_identity_group_by_sha256(sha256_hash: str, exclude_photo_id: int) -> int | None:
+async def find_matching_identity_photo(sha256_hash: str, exclude_photo_id: int):
     async with async_session() as session:
         result = await session.execute(
-            select(Photos.identity_photo_group_id)
+            select(Photos.id, Photos.identity_photo_group_id)
             .join(PhotoAnalysis, PhotoAnalysis.photo_id == Photos.id)
             .where(PhotoAnalysis.sha256_hash == sha256_hash)
             .where(Photos.id != exclude_photo_id)
-            .where(Photos.identity_photo_group_id.isnot(None))
             .limit(1)
         )
-        return result.scalar()
+        return result.one_or_none()
 
 
-async def find_duplicate_group_by_phash(phash: str, threshold: int, exclude_photo_id: int) -> int | None:
+async def find_matching_duplicate_photo(phash: str, threshold: int, exclude_photo_id: int):
     async with async_session() as session:
         result = await session.execute(
             text("""
-                SELECT p.duplicate_group_id
+                SELECT pa.photo_id, p.duplicate_group_id
                 FROM photo_analysis pa
                 JOIN photos p ON p.id = pa.photo_id
                 WHERE pa.photo_id != :exclude_photo_id
                   AND pa.perceptual_hash IS NOT NULL
-                  AND p.duplicate_group_id IS NOT NULL
                   AND BIT_COUNT(
                     decode(pa.perceptual_hash, 'hex')::bit(64) #
                     decode(:phash, 'hex')::bit(64)
                   ) <= :threshold
+                ORDER BY BIT_COUNT(
+                  decode(pa.perceptual_hash, 'hex')::bit(64) #
+                  decode(:phash, 'hex')::bit(64)
+                ) ASC
                 LIMIT 1
             """),
             {"phash": phash, "threshold": threshold, "exclude_photo_id": exclude_photo_id}
         )
-        return result.scalar()
+        return result.one_or_none()
 
 
 async def create_group(is_identity: bool, standart_hash: str, owner_token: str | None = None) -> int:

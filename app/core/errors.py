@@ -21,6 +21,7 @@ class ErrorCodes:
 
     # 404
     PHOTO_NOT_FOUND = "PHOTO_NOT_FOUND"
+    GROUP_NOT_FOUND = "GROUP_NOT_FOUND"
 
     # 409
     DUPLICATE_ENTITY = "DUPLICATE_ENTITY"
@@ -75,6 +76,15 @@ class PhotoNotFoundError(AppException):
             code=ErrorCodes.PHOTO_NOT_FOUND,
             message=f"Photo '{photo_id}' not found",
             details={"photo_id": photo_id},
+        )
+
+class GroupNotFoundError(AppException):
+    def __init__(self, group_id: str):
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            code=ErrorCodes.GROUP_NOT_FOUND,
+            message=f"Group '{group_id}' not found",
+            details={"group_id": group_id},
         )
 
 class InvalidFile(AppException):

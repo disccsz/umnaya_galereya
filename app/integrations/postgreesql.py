@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.database.models import Photos
+from app.database.models import Group, Photos
 from app.core.errors import DatabaseError, ErrorCodes, PhotoNotFoundError, AppException
 
 
@@ -70,3 +70,41 @@ class PhotoDatabase:
                 photo_id, status, exc_info=True,
             )
             raise DatabaseError(cause=str(e), code=ErrorCodes.DATABASE_CANT_GET) from e
+
+
+class GroupDatabase:
+    def __init__(self, session: AsyncSession):
+        self._session = session
+
+    async def list_groups(self) -> list[Group]:
+        try:
+            result = await self._session.execute(
+                select(Group)
+                .options(
+                    selectinload(Group.duplicate_photos),
+                    selectinload(Group.identity_photos),
+                )
+                .order_by(Group.created_at.desc())
+            )
+            return list(result.scalars().all())
+        except Exception as e:
+            logger.error("Database list_groups failed", exc_info=True)
+            raise DatabaseError(cause=str(e), code=ErrorCodes.DATABASE_CANT_EXECUTE)
+
+    async def get_group_by_id(self, id_string: str) -> Group | None:
+        try:
+            result = await self._session.execute(
+                select(Group)
+                .where(Group.id_string == id_string)
+                .limit(1)
+                .options(
+                    selectinload(Group.duplicate_photos).selectinload(Photos.analysis),
+                    selectinload(Group.identity_photos).selectinload(Photos.analysis),
+                )
+            )
+            return result.scalars().first()
+        except Exception as e:
+            logger.error(
+                "Database get_group_by_id failed: %s", id_string, exc_info=True,
+            )
+            raise DatabaseError(cause=str(e), code=ErrorCodes.DATABASE_CANT_EXECUTE)

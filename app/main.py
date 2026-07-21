@@ -10,6 +10,7 @@ from app.core.errors import AppException, ErrorResponse, ErrorDetail
 from app.core.log import setup_logging
 from app.core.context import request_id_var
 from app.api.v1.photos import router
+from app.api.v1.groups import router as groups_router
 
 from contextlib import asynccontextmanager
 from app.integrations.minio import MinIOStorage
@@ -51,6 +52,7 @@ app.include_router(ready_router)
 app.include_router(health_router)    # без префикса — ручка будет /healthz
 
 app.include_router(router)
+app.include_router(groups_router)
 
 @app.middleware("http")
 async def cors_pna(request: Request, call_next):

@@ -40,27 +40,37 @@ async def _call_analyzer_with_retry(
 
 
 async def _check_photo_identity(photo_id: int, sha256_hash: str, owner_token: str | None) -> None:
-    group_id = await db.find_identity_group_by_sha256(sha256_hash, exclude_photo_id=photo_id)
-    if group_id is not None:
-        await db.assign_identity_group(photo_id, group_id)
-        logger.info("Photo %s assigned to identity group %d", photo_id, group_id)
+    match = await db.find_matching_identity_photo(sha256_hash, exclude_photo_id=photo_id)
+    if match is None:
+        return
+
+    existing_photo_id, existing_group_id = match
+    if existing_group_id is not None:
+        await db.assign_identity_group(photo_id, existing_group_id)
+        logger.info("Photo %s assigned to identity group %d", photo_id, existing_group_id)
     else:
         group_id = await db.create_group(True, sha256_hash, owner_token)
+        await db.assign_identity_group(existing_photo_id, group_id)
         await db.assign_identity_group(photo_id, group_id)
-        logger.info("Created identity group %d for photo %s", group_id, photo_id)
+        logger.info("Created identity group %d for photos %d and %d", group_id, existing_photo_id, photo_id)
 
 
 async def _check_photo_duplicates(photo_id: int, perceptual_hash: str, owner_token: str | None) -> None:
-    group_id = await db.find_duplicate_group_by_phash(
+    match = await db.find_matching_duplicate_photo(
         perceptual_hash, 20, exclude_photo_id=photo_id,
     )
-    if group_id is not None:
-        await db.assign_duplicate_group(photo_id, group_id)
-        logger.info("Photo %s assigned to duplicate group %d", photo_id, group_id)
+    if match is None:
+        return
+
+    existing_photo_id, existing_group_id = match
+    if existing_group_id is not None:
+        await db.assign_duplicate_group(photo_id, existing_group_id)
+        logger.info("Photo %s assigned to duplicate group %d", photo_id, existing_group_id)
     else:
         group_id = await db.create_group(False, perceptual_hash, owner_token)
+        await db.assign_duplicate_group(existing_photo_id, group_id)
         await db.assign_duplicate_group(photo_id, group_id)
-        logger.info("Created duplicate group %d for photo %s", group_id, photo_id)
+        logger.info("Created duplicate group %d for photos %d and %d", group_id, existing_photo_id, photo_id)
 
 
 async def process_message(photo_id: str, object_key: str, msg) -> None:
@@ -97,12 +107,15 @@ async def process_message(photo_id: str, object_key: str, msg) -> None:
         preview_key = f"photos/{photo_id}/preview.jpg"
         await minio_client.upload(preview_key, preview_data)
 
+        quality_metric = max(0, 255 - int(analysis.blur_score))
+
         await db.save_analysis(
             photo_id=photo.id,
             faces_count=analysis.faces_count,
             eyes_closed_count=analysis.eyes_closed_count,
             is_blurred=analysis.is_blurred,
             blur_score=analysis.blur_score,
+            quality_metric=quality_metric,
             perceptual_hash=phash or analysis.perceptual_hash,
             sha256_hash=sha256,
             dominant_color=analysis.dominant_color,
