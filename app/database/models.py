@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import (
-    BigInteger, Boolean, DateTime, Enum, ForeignKey, Integer, String, func
+    BigInteger, Boolean, DateTime, Enum, ForeignKey, Float, Integer, String, Text, func
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -139,15 +139,17 @@ class PhotoAnalysis(Base):
     eyes_closed_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     
     is_blurred: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
-    blur_score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    blur_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     quality_metric: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     light_level: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
-    # Хэши для поиска
+    dominant_color: Mapped[Optional[str]] = mapped_column(String(7), nullable=True)
+    tags: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    model_version: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+
     perceptual_hash: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, index=True)
     sha256_hash: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, index=True)
 
-    # Время завершения анализа (ставится вручную кодом, не сервером)
     analysis_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Обратная связь

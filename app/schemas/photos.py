@@ -19,7 +19,7 @@ class GetPhotosByIDResponse(BaseModel):
     faces_count: int | None = None
     eyes_closed_count: int | None = None
     is_blurred: bool | None = None
-    blur_score: int | None = None
+    blur_score: float | None = None
     duplicate_group_id: str | None = None
     identity_group_id: str | None = None
     quality_metric: int | None = None

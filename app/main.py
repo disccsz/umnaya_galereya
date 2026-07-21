@@ -3,6 +3,7 @@ import uuid
 import logging
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core.errors import AppException, ErrorResponse, ErrorDetail
@@ -36,6 +37,13 @@ setup_logging()
 
 app = FastAPI(title="Photo Service", version="0.1.0", lifespan=lifespan)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 from app.api.v1.readyz import router as ready_router
 from app.api.v1.healthz import router as health_router
 
@@ -43,6 +51,12 @@ app.include_router(ready_router)
 app.include_router(health_router)    # без префикса — ручка будет /healthz
 
 app.include_router(router)
+
+@app.middleware("http")
+async def cors_pna(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Private-Network"] = "true"
+    return response
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):

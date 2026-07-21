@@ -58,6 +58,7 @@ class PhotoService:
 
         photo = await self._database.create(photo)
         await self._storage.add_photo(object_key, data, file.content_type or "application/octet-stream")
+        photo = await self._database.update_status(photo_id=photo.id, status=PhotoStatuses.pending)
 
         if self._kafka:
             await self._kafka.send(
@@ -65,8 +66,6 @@ class PhotoService:
                 key=photo_id.encode(),
                 value=json.dumps({"photo_id": photo_id, "object_key": object_key}).encode(),
             )
-
-        photo = await self._database.update_status(photo_id=photo.id, status=PhotoStatuses.pending)
 
         
 
@@ -110,6 +109,18 @@ class PhotoService:
             'status': photo.status,
             'created_at': photo.load_time,
         }
+
+        if photo.analysis:
+            photo_data['faces_count'] = photo.analysis.faces_count
+            photo_data['eyes_closed_count'] = photo.analysis.eyes_closed_count
+            photo_data['is_blurred'] = photo.analysis.is_blurred
+            photo_data['blur_score'] = photo.analysis.blur_score
+            photo_data['quality_metric'] = photo.analysis.quality_metric
+
+        if photo.duplicate_group_rel:
+            photo_data['duplicate_group_id'] = photo.duplicate_group_rel.id_string
+        if photo.identity_group_rel:
+            photo_data['identity_group_id'] = photo.identity_group_rel.id_string
 
         return photo_data
 

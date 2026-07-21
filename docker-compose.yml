@@ -54,6 +54,8 @@ services:
     ports:
       - "9092:9092"
       - "9094:9094"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
     environment:
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_NODE_ID: 1
@@ -63,6 +65,9 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
 
   api:
     build: .
@@ -79,10 +84,10 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       DB_USER: postgres
       DB_PASSWORD: postgres
-      DB_HOST: postgres                # имя сервиса
-      DB_PORT: 5432                     # внутренний порт postgres
+      DB_HOST: postgres
+      DB_PORT: 5432
       DB_NAME: photo_analysis
-      MINIO_ENDPOINT: minio:9000       # имя сервиса + S3 API порт
+      MINIO_ENDPOINT: minio:9000
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin123
       MINIO_BUCKET_NAME: photo-bucket
@@ -90,7 +95,32 @@ services:
       LOG_LEVEL: INFO
       DB_ECHO: "false"
 
+  worker:
+    build: .
+    container_name: photo-worker
+    restart: unless-stopped
+    depends_on:
+      - kafka
+      - postgres
+      - minio
+    environment:
+      SERVICE_TIMEOUT: 30
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: photo_analysis
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+      MINIO_BUCKET_NAME: photo-bucket
+      LOG_LEVEL: INFO
+      DB_ECHO: "false"
+    command: ["python", "-m", "app.worker"]
+
 # Объявляем тома (volumes), чтобы данные не терялись
 volumes:
   pg_data:
   minio_data:
+  kafka_data:

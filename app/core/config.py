@@ -16,7 +16,11 @@ class Settings(BaseSettings):
     MINIO_PUBLIC_URL: str = ""
 
     # --- Kafka ---
-    KAFKA_BOOTSTRAP_SERVERS: str 
+    KAFKA_BOOTSTRAP_SERVERS: str
+
+    # --- Analyzer gRPC ---
+    ANALYSIS_GRPC_URL: str = "45.132.19.101:50051"
+
     # --- Logging ---
     LOG_LEVEL: str = "INFO"
     DB_ECHO: bool = False

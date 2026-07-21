@@ -2,6 +2,7 @@ import logging
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.database.models import Photos
 from app.core.errors import DatabaseError, ErrorCodes, PhotoNotFoundError, AppException
@@ -37,7 +38,14 @@ class PhotoDatabase:
     async def get_photo_by_id(self, string_id: str) -> Photos:
         try:
             result = await self._session.execute(
-                select(Photos).where(Photos.id_string == string_id).limit(1)
+                select(Photos)
+                .where(Photos.id_string == string_id)
+                .limit(1)
+                .options(
+                    selectinload(Photos.analysis),
+                    selectinload(Photos.duplicate_group_rel),
+                    selectinload(Photos.identity_group_rel),
+                )
             )
             return result.scalars().first()
         except Exception as e:
