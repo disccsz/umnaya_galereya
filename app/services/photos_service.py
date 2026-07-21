@@ -118,6 +118,7 @@ class PhotoService:
             photo_data['is_blurred'] = photo.analysis.is_blurred
             photo_data['blur_score'] = photo.analysis.blur_score
             photo_data['quality_metric'] = photo.analysis.quality_metric
+            photo_data['tags'] = json.loads(photo.analysis.tags) if photo.analysis.tags else None
 
         if photo.duplicate_group_rel:
             photo_data['duplicate_group_id'] = photo.duplicate_group_rel.id_string

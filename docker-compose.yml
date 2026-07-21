@@ -101,6 +101,7 @@ services:
       MINIO_ROOT_PASSWORD: minioadmin123
       MINIO_BUCKET_NAME: photo-bucket
       MINIO_PUBLIC_URL: localhost:9100
+      ANALYSIS_GRPC_URL: 45.132.19.101:50051
       LOG_LEVEL: INFO
       DB_ECHO: "false"
 
@@ -127,6 +128,7 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin123
       MINIO_BUCKET_NAME: photo-bucket
+      ANALYSIS_GRPC_URL: 45.132.19.101:50051
       LOG_LEVEL: INFO
       DB_ECHO: "false"
     command: ["python", "-m", "app.worker"]
@@ -142,24 +144,6 @@ services:
       - prometheus_data:/prometheus
     depends_on:
       - api
-    healthcheck:
-      test: ["CMD", "wget", "-q", "http://localhost:9090/-/ready", "-O", "/dev/null"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-      start_period: 10s
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: photo-grafana
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
-    depends_on:
-      prometheus:
-        condition: service_healthy
 
 # Объявляем тома (volumes), чтобы данные не терялись
 volumes:
@@ -167,4 +151,3 @@ volumes:
   minio_data:
   kafka_data:
   prometheus_data:
-  grafana_data:

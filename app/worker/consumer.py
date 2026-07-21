@@ -56,6 +56,7 @@ async def run_worker():
                         logger.error(
                             "Failed to process %s: %s", photo_id, e, exc_info=True,
                         )
+                        await consumer.commit()
 
             finally:
                 await consumer.stop()

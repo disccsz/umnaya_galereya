@@ -101,24 +101,32 @@ async def find_matching_duplicate_photo(phash: str, threshold: int, exclude_phot
     async with async_session() as session:
         result = await session.execute(
             text("""
-                SELECT pa.photo_id, p.duplicate_group_id
+                SELECT pa.photo_id, p.duplicate_group_id, pa.perceptual_hash
                 FROM photo_analysis pa
                 JOIN photos p ON p.id = pa.photo_id
                 WHERE pa.photo_id != :exclude_photo_id
                   AND pa.perceptual_hash IS NOT NULL
-                  AND BIT_COUNT(
-                    decode(pa.perceptual_hash, 'hex')::bit(64) #
-                    decode(:phash, 'hex')::bit(64)
-                  ) <= :threshold
-                ORDER BY BIT_COUNT(
-                  decode(pa.perceptual_hash, 'hex')::bit(64) #
-                  decode(:phash, 'hex')::bit(64)
-                ) ASC
-                LIMIT 1
             """),
-            {"phash": phash, "threshold": threshold, "exclude_photo_id": exclude_photo_id}
+            {"exclude_photo_id": exclude_photo_id}
         )
-        return result.one_or_none()
+        rows = result.all()
+
+    target = int(phash, 16)
+    best_photo_id = None
+    best_group_id = None
+    best_dist = threshold + 1
+
+    for photo_id, group_id, hash_str in rows:
+        dist = (target ^ int(hash_str, 16)).bit_count()
+        if dist < best_dist:
+            best_dist = dist
+            best_photo_id = photo_id
+            best_group_id = group_id
+
+    if best_photo_id is None:
+        return None
+
+    return best_photo_id, best_group_id
 
 
 async def create_group(is_identity: bool, standart_hash: str, owner_token: str | None = None) -> int:
@@ -148,3 +156,65 @@ async def assign_duplicate_group(photo_id: int, group_id: int) -> None:
         if photo:
             photo.duplicate_group_id = group_id
             await session.commit()
+
+
+async def claim_photo(photo_int_id: int) -> int | None:
+    async with async_session() as session:
+        result = await session.execute(
+            text("""
+                UPDATE photos
+                SET status = 'processing', attempts = attempts + 1
+                WHERE id = :id AND status = 'pending'
+                RETURNING attempts
+            """),
+            {"id": photo_int_id}
+        )
+        await session.commit()
+        row = result.one_or_none()
+        if row is None:
+            return None
+        return row.attempts
+
+
+async def save_analysis_and_finish(
+    photo_id: int,
+    status: PhotoStatuses,
+    preview_key: str | None = None,
+    faces_count: int | None = None,
+    eyes_closed_count: int | None = None,
+    is_blurred: bool | None = None,
+    blur_score: float | None = None,
+    quality_metric: int | None = None,
+    perceptual_hash: str | None = None,
+    sha256_hash: str | None = None,
+    dominant_color: str | None = None,
+    tags: list[str] | None = None,
+    model_version: str | None = None,
+) -> None:
+    async with async_session() as session:
+        photo = await session.get(Photos, photo_id)
+        if not photo:
+            logger.error("Photo %s not found for save_analysis_and_finish", photo_id)
+            return
+
+        analysis = PhotoAnalysis(
+            photo_id=photo_id,
+            faces_count=faces_count,
+            eyes_closed_count=eyes_closed_count,
+            is_blurred=is_blurred,
+            blur_score=blur_score,
+            quality_metric=quality_metric,
+            perceptual_hash=perceptual_hash,
+            sha256_hash=sha256_hash,
+            dominant_color=dominant_color,
+            tags=json.dumps(tags) if tags else None,
+            model_version=model_version,
+            analysis_at=datetime.now(timezone.utc),
+        )
+        session.add(analysis)
+
+        photo.status = status
+        if preview_key:
+            photo.preview_key = preview_key
+
+        await session.commit()

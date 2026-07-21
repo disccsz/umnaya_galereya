@@ -78,12 +78,12 @@ async def process_message(photo_id: str, object_key: str, msg) -> None:
     if not photo:
         raise RuntimeError(f"Photo {photo_id} not found in DB")
 
-    attempts = photo.attempts + 1
+    attempts = await db.claim_photo(photo.id)
+    if attempts is None:
+        logger.info("Photo %s already claimed by another worker", photo_id)
+        return
 
     try:
-        await db.update_status(
-            photo.id, PhotoStatuses.processing, attempts=attempts,
-        )
         logger.info("Processing photo %s (attempt %d)", photo_id, attempts)
 
         image_data = await minio_client.read(object_key)
@@ -109,8 +109,10 @@ async def process_message(photo_id: str, object_key: str, msg) -> None:
 
         quality_metric = max(0, 255 - int(analysis.blur_score))
 
-        await db.save_analysis(
+        await db.save_analysis_and_finish(
             photo_id=photo.id,
+            status=PhotoStatuses.done,
+            preview_key=preview_key,
             faces_count=analysis.faces_count,
             eyes_closed_count=analysis.eyes_closed_count,
             is_blurred=analysis.is_blurred,
@@ -121,9 +123,6 @@ async def process_message(photo_id: str, object_key: str, msg) -> None:
             dominant_color=analysis.dominant_color,
             tags=list(analysis.tags) if analysis.tags else None,
             model_version=analysis.model_version,
-        )
-        await db.update_photo_after_analysis(
-            photo.id, PhotoStatuses.done, preview_key=preview_key,
         )
 
         logger.info("Photo %s processed successfully", photo_id)
@@ -149,9 +148,3 @@ async def process_message(photo_id: str, object_key: str, msg) -> None:
                 last_error_message=error_msg,
             )
             logger.warning("Photo %s moved to failed after %d attempts", photo_id, attempts)
-        else:
-            logger.info(
-                "Photo %s will be retried (attempt %d/%d)",
-                photo_id, attempts, MAX_RETRIES,
-            )
-            raise

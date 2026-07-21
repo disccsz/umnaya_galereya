@@ -23,6 +23,7 @@ class GetPhotosByIDResponse(BaseModel):
     duplicate_group_id: str | None = None
     identity_group_id: str | None = None
     quality_metric: int | None = None
+    tags: list[str] | None = None
     created_at: datetime
 
 class PhotoItem(BaseModel):
