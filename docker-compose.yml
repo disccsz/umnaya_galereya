@@ -89,6 +89,7 @@ services:
       minio:
         condition: service_started
     environment:
+      VK_SECRET_KEY: YK832M5Ut8tpgr8ITiQA
       SERVICE_TIMEOUT: 10
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       DB_USER: postgres
@@ -117,6 +118,7 @@ services:
       minio:
         condition: service_started
     environment:
+      VK_SECRET_KEY: YK832M5Ut8tpgr8ITiQA
       SERVICE_TIMEOUT: 30
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       DB_USER: postgres

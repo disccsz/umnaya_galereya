@@ -16,8 +16,16 @@ class ErrorCodes:
 
     # 400
     VALIDATION_ERROR = "VALIDATION_ERROR"
+    MISSING_PARAMETER = "MISSING_PARAMETER"
     INVALID_FILE_TYPE = "INVALID_FILE_TYPE"
     FILE_TOO_LARGE = "FILE_TOO_LARGE"
+
+    # 401
+    UNAUTHORIZED = "UNAUTHORIZED"
+
+    # 403
+    ACCESS_DENIED = "ACCESS_DENIED"
+    PRIVATE_PHOTO = "PRIVATE_PHOTO"
 
     # 404
     PHOTO_NOT_FOUND = "PHOTO_NOT_FOUND"
@@ -121,5 +129,29 @@ class StorageError(AppException):
             code=code,
             message=f"Minio error: {cause}",
             details={"cause": cause},
+        )
+
+class MissingParamError(AppException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            code=ErrorCodes.MISSING_PARAMETER,
+            message="Missing required parameter",
+        )
+
+class AccessDeniedError(AppException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_403_FORBIDDEN,
+            code=ErrorCodes.ACCESS_DENIED,
+            message="Access Denied",
+        )
+
+class PrivatePhotoAccessError(AppException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_403_FORBIDDEN,
+            code=ErrorCodes.PRIVATE_PHOTO,
+            message="Private photo",
         )
     

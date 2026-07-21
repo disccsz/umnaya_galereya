@@ -10,8 +10,8 @@ class GroupService:
     def __init__(self, database: GroupDatabase):
         self._database = database
 
-    async def list_groups(self) -> list[dict]:
-        groups = await self._database.list_groups()
+    async def list_groups(self, owner_data_token: str | None = None) -> list[dict]:
+        groups = await self._database.list_groups(owner_data_token=owner_data_token)
         result = []
         for g in groups:
             photos = g.duplicate_photos if not g.is_identity_group else g.identity_photos
@@ -23,8 +23,8 @@ class GroupService:
             })
         return result
 
-    async def get_group_by_id(self, id_string: str) -> dict:
-        group = await self._database.get_group_by_id(id_string)
+    async def get_group_by_id(self, id_string: str, owner_data_token: str | None = None) -> dict:
+        group = await self._database.get_group_by_id(id_string, owner_data_token=owner_data_token)
         if not group:
             raise GroupNotFoundError(group_id=id_string)
 

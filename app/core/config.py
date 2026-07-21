@@ -27,6 +27,10 @@ class Settings(BaseSettings):
 
     SERVICE_TIMEOUT: int
 
+    # --- VK Auth ---
+    VK_SECRET_KEY: str
+    JWT_EXPIRE_MINUTES: int = 525600
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

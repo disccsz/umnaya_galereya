@@ -23,7 +23,7 @@ class PhotoService:
         self._storage = storage
         self._kafka = kafka
 
-    async def create_photo(self, file: UploadFile) -> Photos:
+    async def create_photo(self, file: UploadFile, owner_data_token: str | None = None) -> Photos:
         MAX_SIZE = 3 * 1024 * 1024
         if file.size and file.size > MAX_SIZE:
             logger.warning("File too large by header: %s", file.size)
@@ -53,6 +53,8 @@ class PhotoService:
         photo = Photos(
             id_string=photo_id, object_key=object_key,
             photo_size=len(data), status=PhotoStatuses.uploading,
+            owner_data_token=owner_data_token,
+            is_private=owner_data_token is not None,
         )
 
         
@@ -77,8 +79,8 @@ class PhotoService:
         photos_uploaded_total.inc()
         return photo
 
-    async def list_photos(self) -> List[PhotoItem]:
-        photos = await self._database.list()
+    async def list_photos(self, owner_data_token: str | None = None) -> List[PhotoItem]:
+        photos = await self._database.list(owner_data_token=owner_data_token)
         response = []
 
         for photo in photos:
@@ -99,8 +101,8 @@ class PhotoService:
         logger.info("Photos listed: count=%s", len(response))
         return response
 
-    async def get_photo_by_id(self, string_id: str) -> Photos:
-        photo = await self._database.get_photo_by_id(string_id=string_id)
+    async def get_photo_by_id(self, string_id: str, owner_data_token: str | None = None) -> Photos:
+        photo = await self._database.get_photo_by_id(string_id=string_id, owner_data_token=owner_data_token)
 
         if not photo:
             logger.info("Photo not found: %s", string_id)
@@ -127,8 +129,8 @@ class PhotoService:
 
         return photo_data
 
-    async def get_photo_content_by_id(self, string_id: str) -> Photos:
-        photo = await self._database.get_photo_by_id(string_id=string_id)
+    async def get_photo_content_by_id(self, string_id: str, owner_data_token: str | None = None) -> Photos:
+        photo = await self._database.get_photo_by_id(string_id=string_id, owner_data_token=owner_data_token)
         if not photo:
             logger.info("Photo not found: %s", string_id)
             raise PhotoNotFoundError(photo_id=string_id)

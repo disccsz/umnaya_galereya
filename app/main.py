@@ -12,6 +12,7 @@ from app.core.context import request_id_var
 from app.api.v1.photos import router
 from app.api.v1.groups import router as groups_router
 from app.api.v1.metrics import router as metrics_router
+from app.api.v1.auth import router as auth_router
 
 from contextlib import asynccontextmanager
 from app.integrations.minio import MinIOStorage
@@ -53,6 +54,7 @@ from app.api.v1.healthz import router as health_router
 app.include_router(ready_router) 
 app.include_router(health_router)    # без префикса — ручка будет /healthz
 
+app.include_router(auth_router)
 app.include_router(router)
 app.include_router(groups_router)
 app.include_router(metrics_router)

@@ -40,7 +40,7 @@ async def _call_analyzer_with_retry(
 
 
 async def _check_photo_identity(photo_id: int, sha256_hash: str, owner_token: str | None) -> None:
-    match = await db.find_matching_identity_photo(sha256_hash, exclude_photo_id=photo_id)
+    match = await db.find_matching_identity_photo(sha256_hash, exclude_photo_id=photo_id, owner_token=owner_token)
     if match is None:
         return
 
@@ -57,7 +57,7 @@ async def _check_photo_identity(photo_id: int, sha256_hash: str, owner_token: st
 
 async def _check_photo_duplicates(photo_id: int, perceptual_hash: str, owner_token: str | None) -> None:
     match = await db.find_matching_duplicate_photo(
-        perceptual_hash, 20, exclude_photo_id=photo_id,
+        perceptual_hash, 20, exclude_photo_id=photo_id, owner_token=owner_token,
     )
     if match is None:
         return

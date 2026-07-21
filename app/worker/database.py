@@ -85,29 +85,39 @@ async def update_photo_after_analysis(
         await session.commit()
 
 
-async def find_matching_identity_photo(sha256_hash: str, exclude_photo_id: int):
+async def find_matching_identity_photo(sha256_hash: str, exclude_photo_id: int, owner_token: str | None = None):
     async with async_session() as session:
-        result = await session.execute(
+        stmt = (
             select(Photos.id, Photos.identity_photo_group_id)
             .join(PhotoAnalysis, PhotoAnalysis.photo_id == Photos.id)
             .where(PhotoAnalysis.sha256_hash == sha256_hash)
             .where(Photos.id != exclude_photo_id)
             .limit(1)
         )
+        if owner_token is not None:
+            stmt = stmt.where(Photos.owner_data_token == owner_token)
+        else:
+            stmt = stmt.where(Photos.owner_data_token.is_(None))
+        result = await session.execute(stmt)
         return result.one_or_none()
 
 
-async def find_matching_duplicate_photo(phash: str, threshold: int, exclude_photo_id: int):
+async def find_matching_duplicate_photo(phash: str, threshold: int, exclude_photo_id: int, owner_token: str | None = None):
     async with async_session() as session:
+        if owner_token is not None:
+            owner_condition = "AND p.owner_data_token = :owner_token"
+        else:
+            owner_condition = "AND p.owner_data_token IS NULL"
         result = await session.execute(
-            text("""
+            text(f"""
                 SELECT pa.photo_id, p.duplicate_group_id, pa.perceptual_hash
                 FROM photo_analysis pa
                 JOIN photos p ON p.id = pa.photo_id
                 WHERE pa.photo_id != :exclude_photo_id
                   AND pa.perceptual_hash IS NOT NULL
+                  {owner_condition}
             """),
-            {"exclude_photo_id": exclude_photo_id}
+            {"exclude_photo_id": exclude_photo_id, "owner_token": owner_token}
         )
         rows = result.all()
 
@@ -135,6 +145,7 @@ async def create_group(is_identity: bool, standart_hash: str, owner_token: str |
             is_identity_group=is_identity,
             standart_hash=standart_hash,
             owner_data_token=owner_token,
+            is_private=owner_token is not None,
         )
         session.add(group)
         await session.commit()
