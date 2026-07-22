@@ -101,7 +101,7 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin123
       MINIO_BUCKET_NAME: photo-bucket
-      MINIO_PUBLIC_URL: localhost:9100
+      MINIO_PUBLIC_URL: jubilant-tribble-97x6qj4j7xpr2x69x-9100.app.github.dev
       ANALYSIS_GRPC_URL: 45.132.19.101:50051
       LOG_LEVEL: INFO
       DB_ECHO: "false"
