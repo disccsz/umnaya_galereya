@@ -85,7 +85,19 @@ class PhotoService:
 
         for photo in photos:
             if photo.status != PhotoStatuses.uploading:
-                photo_data = {'photo_id': photo.id_string, 'status': photo.status}
+                photo_data = {
+                    'photo_id': photo.id_string,
+                    'status': photo.status,
+                    'created_at': photo.load_time,
+                }
+
+                group_ids = []
+                if photo.duplicate_group_rel:
+                    group_ids.append(photo.duplicate_group_rel.id_string)
+                if photo.identity_group_rel:
+                    group_ids.append(photo.identity_group_rel.id_string)
+                if group_ids:
+                    photo_data['groups_ids'] = group_ids
 
                 original_photo_url = await self._storage.get_presigned_url(
                     object_key=photo.object_key,

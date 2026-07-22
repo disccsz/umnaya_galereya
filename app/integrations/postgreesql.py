@@ -33,7 +33,12 @@ class PhotoDatabase:
                 stmt = stmt.where(Photos.owner_data_token == owner_data_token)
             else:
                 stmt = stmt.where(Photos.is_private == False)
-            result = await self._session.execute(stmt)
+            result = await self._session.execute(
+                stmt.options(
+                    selectinload(Photos.duplicate_group_rel),
+                    selectinload(Photos.identity_group_rel),
+                )
+            )
             return list(result.scalars().all())
         except Exception as e:
             logger.error("Database list failed", exc_info=True)

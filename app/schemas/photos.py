@@ -31,6 +31,8 @@ class PhotoItem(BaseModel):
     status: Literal['uploading', "pending", "processing", "done", "failed"]
     original_image_url: str | None = None
     preview_image_url: str | None = None
+    created_at: datetime | None = None
+    groups_ids: list[str] | None = None
 
 class GetPhotosListResponse(BaseModel):
     photos: list[PhotoItem]
