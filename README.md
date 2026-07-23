@@ -1,3 +1,5 @@
+<img width="1920" height="1080" alt="Slide 16_9 - 1" src="https://github.com/user-attachments/assets/d1a23678-be24-4524-834b-2367745b664d" />
+
 <div align="center">
 
 # Умная галерея
@@ -22,6 +24,9 @@ curl http://localhost:8000/healthz
 ```
 
 Интерактивная API-документация: [https://api.disccsz.ru:51001/redoc](https://api.disccsz.ru:51001/redoc)
+
+<img width="2541" height="1289" alt="image" src="https://github.com/user-attachments/assets/65588aab-8c6b-4488-aa3f-d4ff69aa6142" />
+
 
 <details>
 <summary><b>Kubernetes (kind)</b></summary>
