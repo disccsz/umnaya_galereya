@@ -1,0 +1,757 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Photo analysis service documentation" name="description"/>
+<meta content="Umnaya Galereya Team" name="author"/>
+<link href="../api/" rel="prev"/>
+<link href="../environment/" rel="next"/>
+<link href="../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.7" name="generator"/>
+<title>Развёртывание - Умная галерея</title>
+<link href="../assets/stylesheets/main.ec1eaa64.min.css" rel="stylesheet"/>
+<link href="../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="indigo" data-md-color-primary="indigo" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#_1">
+          Перейти к содержанию
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header md-header--shadow" data-md-component="header">
+<nav aria-label="Верхний колонтитул" class="md-header__inner md-grid">
+<a aria-label="Умная галерея" class="md-header__button md-logo" data-md-component="logo" href=".." title="Умная галерея">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            Умная галерея
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Развёртывание
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="default" id="__palette_0" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"></path></svg>
+</label>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="slate" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_0" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"></path></svg>
+</label>
+</form>
+<script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Поиск" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Поиск" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Поиск" class="md-search__options">
+<button aria-label="Очистить" class="md-search__icon md-icon" tabindex="-1" title="Очистить" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Инициализация поиска
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/anomalyco/umnaya_galereya" title="Перейти к репозиторию">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Навигация" class="md-nav md-nav--primary" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="Умная галерея" class="md-nav__button md-logo" data-md-component="logo" href=".." title="Умная галерея">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    Умная галерея
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/anomalyco/umnaya_galereya" title="Перейти к репозиторию">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="..">
+<span class="md-ellipsis">
+    
+  
+    Главная
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../getting-started/">
+<span class="md-ellipsis">
+    
+  
+    Быстрый старт
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Архитектура
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Архитектура
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../architecture/">
+<span class="md-ellipsis">
+    
+  
+    Архитектура
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../api/">
+<span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    
+  
+    Развёртывание
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    
+  
+    Развёртывание
+  
+
+    
+  </span>
+</a>
+<nav aria-label="Содержание" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#docker-compose">
+<span class="md-ellipsis">
+      
+        Docker Compose
+      
+    </span>
+</a>
+<nav aria-label="Docker Compose" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_2">
+<span class="md-ellipsis">
+      
+        Полный стек
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_3">
+<span class="md-ellipsis">
+      
+        Зависимости между сервисами
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#production">
+<span class="md-ellipsis">
+      
+        Переменные для Production
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#kubernetes-kind">
+<span class="md-ellipsis">
+      
+        Kubernetes (kind)
+      
+    </span>
+</a>
+<nav aria-label="Kubernetes (kind)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_4">
+<span class="md-ellipsis">
+      
+        Предварительные требования
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_5">
+<span class="md-ellipsis">
+      
+        Манифесты
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_6">
+<span class="md-ellipsis">
+      
+        Деплой
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_7">
+<span class="md-ellipsis">
+      
+        Особенности
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_8">
+<span class="md-ellipsis">
+      
+        Обновление
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_9">
+<span class="md-ellipsis">
+      
+        Остановка
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#dockerfile">
+<span class="md-ellipsis">
+      
+        Dockerfile
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../environment/">
+<span class="md-ellipsis">
+    
+  
+    Переменные окружения
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../project-structure/">
+<span class="md-ellipsis">
+    
+  
+    Структура проекта
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../metrics/">
+<span class="md-ellipsis">
+    
+  
+    Метрики
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Содержание" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#docker-compose">
+<span class="md-ellipsis">
+      
+        Docker Compose
+      
+    </span>
+</a>
+<nav aria-label="Docker Compose" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_2">
+<span class="md-ellipsis">
+      
+        Полный стек
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_3">
+<span class="md-ellipsis">
+      
+        Зависимости между сервисами
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#production">
+<span class="md-ellipsis">
+      
+        Переменные для Production
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#kubernetes-kind">
+<span class="md-ellipsis">
+      
+        Kubernetes (kind)
+      
+    </span>
+</a>
+<nav aria-label="Kubernetes (kind)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_4">
+<span class="md-ellipsis">
+      
+        Предварительные требования
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_5">
+<span class="md-ellipsis">
+      
+        Манифесты
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_6">
+<span class="md-ellipsis">
+      
+        Деплой
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_7">
+<span class="md-ellipsis">
+      
+        Особенности
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_8">
+<span class="md-ellipsis">
+      
+        Обновление
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_9">
+<span class="md-ellipsis">
+      
+        Остановка
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#dockerfile">
+<span class="md-ellipsis">
+      
+        Dockerfile
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="_1">Развёртывание</h1>
+<h2 id="docker-compose">Docker Compose</h2>
+<h3 id="_2">Полный стек</h3>
+<p>Файл <code>docker-compose.yml</code> в корне проекта описывает 8 сервисов:</p>
+<table>
+<thead>
+<tr>
+<th>Сервис</th>
+<th>Образ</th>
+<th>Назначение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>postgres</code></td>
+<td><code>postgres:16-alpine</code></td>
+<td>Реляционная БД (порт <code>5435:5432</code>)</td>
+</tr>
+<tr>
+<td><code>minio</code></td>
+<td><code>minio/minio:latest</code></td>
+<td>S3-совместимое хранилище</td>
+</tr>
+<tr>
+<td><code>nginx</code></td>
+<td><code>nginx:alpine</code></td>
+<td>Реверс-прокси для MinIO</td>
+</tr>
+<tr>
+<td><code>kafka</code></td>
+<td><code>apache/kafka:latest</code></td>
+<td>Брокер сообщений</td>
+</tr>
+<tr>
+<td><code>api</code></td>
+<td>(сборка из Dockerfile)</td>
+<td>FastAPI приложение</td>
+</tr>
+<tr>
+<td><code>worker</code></td>
+<td>(сборка из Dockerfile)</td>
+<td>Фоновый обработчик</td>
+</tr>
+<tr>
+<td><code>prometheus</code></td>
+<td><code>prom/prometheus</code></td>
+<td>Сбор метрик</td>
+</tr>
+<tr>
+<td><code>grafana</code></td>
+<td><code>grafana/grafana</code></td>
+<td>Визуализация метрик</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="c1"># Запуск</span>
+<a href="#__codelineno-0-2" id="__codelineno-0-2" name="__codelineno-0-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+<a href="#__codelineno-0-3" id="__codelineno-0-3" name="__codelineno-0-3"></a>
+<a href="#__codelineno-0-4" id="__codelineno-0-4" name="__codelineno-0-4"></a><span class="c1"># Логи конкретного сервиса</span>
+<a href="#__codelineno-0-5" id="__codelineno-0-5" name="__codelineno-0-5"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>api
+<a href="#__codelineno-0-6" id="__codelineno-0-6" name="__codelineno-0-6"></a>
+<a href="#__codelineno-0-7" id="__codelineno-0-7" name="__codelineno-0-7"></a><span class="c1"># Остановка с удалением томов</span>
+<a href="#__codelineno-0-8" id="__codelineno-0-8" name="__codelineno-0-8"></a>docker<span class="w"> </span>compose<span class="w"> </span>down<span class="w"> </span>-v
+</code></pre></div>
+<h3 id="_3">Зависимости между сервисами</h3>
+<svg id="mermaid-1784787782905" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="max-width: 474.40625px;" viewBox="-8 -8 474.40625 258" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#mermaid-1784787782905{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#333;}#mermaid-1784787782905 .error-icon{fill:#552222;}#mermaid-1784787782905 .error-text{fill:#552222;stroke:#552222;}#mermaid-1784787782905 .edge-thickness-normal{stroke-width:2px;}#mermaid-1784787782905 .edge-thickness-thick{stroke-width:3.5px;}#mermaid-1784787782905 .edge-pattern-solid{stroke-dasharray:0;}#mermaid-1784787782905 .edge-pattern-dashed{stroke-dasharray:3;}#mermaid-1784787782905 .edge-pattern-dotted{stroke-dasharray:2;}#mermaid-1784787782905 .marker{fill:#333333;stroke:#333333;}#mermaid-1784787782905 .marker.cross{stroke:#333333;}#mermaid-1784787782905 svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;}#mermaid-1784787782905 .label{font-family:"trebuchet ms",verdana,arial,sans-serif;color:#333;}#mermaid-1784787782905 .cluster-label text{fill:#333;}#mermaid-1784787782905 .cluster-label span,#mermaid-1784787782905 p{color:#333;}#mermaid-1784787782905 .label text,#mermaid-1784787782905 span,#mermaid-1784787782905 p{fill:#333;color:#333;}#mermaid-1784787782905 .node rect,#mermaid-1784787782905 .node circle,#mermaid-1784787782905 .node ellipse,#mermaid-1784787782905 .node polygon,#mermaid-1784787782905 .node path{fill:#ECECFF;stroke:#9370DB;stroke-width:1px;}#mermaid-1784787782905 .flowchart-label text{text-anchor:middle;}#mermaid-1784787782905 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mermaid-1784787782905 .node .label{text-align:center;}#mermaid-1784787782905 .node.clickable{cursor:pointer;}#mermaid-1784787782905 .arrowheadPath{fill:#333333;}#mermaid-1784787782905 .edgePath .path{stroke:#333333;stroke-width:2.0px;}#mermaid-1784787782905 .flowchart-link{stroke:#333333;fill:none;}#mermaid-1784787782905 .edgeLabel{background-color:#e8e8e8;text-align:center;}#mermaid-1784787782905 .edgeLabel rect{opacity:0.5;background-color:#e8e8e8;fill:#e8e8e8;}#mermaid-1784787782905 .labelBkg{background-color:rgba(232, 232, 232, 0.5);}#mermaid-1784787782905 .cluster rect{fill:#ffffde;stroke:#aaaa33;stroke-width:1px;}#mermaid-1784787782905 .cluster text{fill:#333;}#mermaid-1784787782905 .cluster span,#mermaid-1784787782905 p{color:#333;}#mermaid-1784787782905 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:12px;background:hsl(80, 100%, 96.2745098039%);border:1px solid #aaaa33;border-radius:2px;pointer-events:none;z-index:100;}#mermaid-1784787782905 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#333;}#mermaid-1784787782905 :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><marker id="mermaid-1784787782905_flowchart-pointEnd" class="marker flowchart" viewBox="0 0 10 10" refX="6" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker><marker id="mermaid-1784787782905_flowchart-pointStart" class="marker flowchart" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker><marker id="mermaid-1784787782905_flowchart-circleEnd" class="marker flowchart" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></circle></marker><marker id="mermaid-1784787782905_flowchart-circleStart" class="marker flowchart" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></circle></marker><marker id="mermaid-1784787782905_flowchart-crossEnd" class="marker cross flowchart" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"></path></marker><marker id="mermaid-1784787782905_flowchart-crossStart" class="marker cross flowchart" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"></path></marker><g class="root"><g class="clusters"></g><g class="edgePaths"><path d="M319.703,44.139L326.19,39.616C332.677,35.093,345.651,26.046,357.164,21.523C368.676,17,378.727,17,383.753,17L388.778,17" id="L-api-kafka-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-api LE-kafka" style="fill:none;" marker-end="url(#mermaid-1784787782905_flowchart-pointEnd)"></path><path d="M319.703,64.074L326.19,66.561C332.677,69.049,345.651,74.025,356.226,78.609C366.802,83.194,374.978,87.387,379.066,89.484L383.155,91.581" id="L-api-postgres-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-api LE-postgres" style="fill:none;" marker-end="url(#mermaid-1784787782905_flowchart-pointEnd)"></path><path d="M309.665,74L317.825,90.5C325.985,107,342.305,140,355.922,160.173C369.539,180.347,380.452,187.694,385.909,191.367L391.366,195.04" id="L-api-minio-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-api LE-minio" style="fill:none;" marker-end="url(#mermaid-1784787782905_flowchart-pointEnd)"></path><path d="M313.151,124L320.73,113.167C328.309,102.333,343.467,80.667,356.503,66.16C369.539,51.653,380.452,44.306,385.909,40.633L391.366,36.96" id="L-worker-kafka-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-worker LE-kafka" style="fill:none;" marker-end="url(#mermaid-1784787782905_flowchart-pointEnd)"></path><path d="M333.625,147.771L337.792,148.642C341.958,149.514,350.292,151.257,359.915,148.455C369.539,145.653,380.452,138.306,385.909,134.633L391.366,130.96" id="L-worker-postgres-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-worker LE-postgres" style="fill:none;" marker-end="url(#mermaid-1784787782905_flowchart-pointEnd)"></path><path d="M320.012,158L326.448,163.833C332.883,169.667,345.754,181.333,357.194,188.931C368.633,196.529,378.642,200.058,383.646,201.823L388.65,203.587" id="L-worker-minio-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-worker LE-minio" style="fill:none;" marker-end="url(#mermaid-1784787782905_flowchart-pointEnd)"></path><path d="M218.891,57L223.057,57C227.224,57,235.557,57,245.328,57C255.098,57,266.305,57,271.909,57L277.513,57" id="L-prometheus-api-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-prometheus LE-api" style="fill:none;" marker-end="url(#mermaid-1784787782905_flowchart-pointEnd)"></path><path d="M69.125,57L73.292,57C77.458,57,85.792,57,93.242,57C100.692,57,107.258,57,110.542,57L113.825,57" id="L-grafana-prometheus-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-grafana LE-prometheus" style="fill:none;" marker-end="url(#mermaid-1784787782905_flowchart-pointEnd)"></path><path d="M327.805,225L332.941,225C338.078,225,348.352,225,358.453,224.204C368.555,223.408,378.485,221.817,383.45,221.021L388.415,220.225" id="L-nginx-minio-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-nginx LE-minio" style="fill:none;" marker-end="url(#mermaid-1784787782905_flowchart-pointEnd)"></path></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default default flowchart-label" id="flowchart-api-0" data-node="true" data-id="api" transform="translate(301.2578125, 57)"><rect class="basic label-container" style="" rx="0" ry="0" x="-18.4453125" y="-17" width="36.890625" height="34"></rect><g class="label" style="" transform="translate(-10.9453125, -9.5)"><rect></rect><foreignObject width="21.890625" height="19"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">api</span></div></foreignObject></g></g><g class="node default default flowchart-label" id="flowchart-kafka-1" data-node="true" data-id="kafka" transform="translate(421.015625, 17)"><rect class="basic label-container" style="" rx="0" ry="0" x="-26.9375" y="-17" width="53.875" height="34"></rect><g class="label" style="" transform="translate(-19.4375, -9.5)"><rect></rect><foreignObject width="38.875" height="19"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">kafka</span></div></foreignObject></g></g><g class="node default default flowchart-label" id="flowchart-postgres-3" data-node="true" data-id="postgres" transform="translate(421.015625, 111)"><rect class="basic label-container" style="" rx="0" ry="0" x="-37.390625" y="-17" width="74.78125" height="34"></rect><g class="label" style="" transform="translate(-29.890625, -9.5)"><rect></rect><foreignObject width="59.78125" height="19"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">postgres</span></div></foreignObject></g></g><g class="node default default flowchart-label" id="flowchart-minio-5" data-node="true" data-id="minio" transform="translate(421.015625, 215)"><rect class="basic label-container" style="" rx="0" ry="0" x="-27.3671875" y="-17" width="54.734375" height="34"></rect><g class="label" style="" transform="translate(-19.8671875, -9.5)"><rect></rect><foreignObject width="39.734375" height="19"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">minio</span></div></foreignObject></g></g><g class="node default default flowchart-label" id="flowchart-worker-6" data-node="true" data-id="worker" transform="translate(301.2578125, 141)"><rect class="basic label-container" style="" rx="0" ry="0" x="-32.3671875" y="-17" width="64.734375" height="34"></rect><g class="label" style="" transform="translate(-24.8671875, -9.5)"><rect></rect><foreignObject width="49.734375" height="19"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">worker</span></div></foreignObject></g></g><g class="node default default flowchart-label" id="flowchart-prometheus-12" data-node="true" data-id="prometheus" transform="translate(169.0078125, 57)"><rect class="basic label-container" style="" rx="0" ry="0" x="-49.8828125" y="-17" width="99.765625" height="34"></rect><g class="label" style="" transform="translate(-42.3828125, -9.5)"><rect></rect><foreignObject width="84.765625" height="19"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">prometheus</span></div></foreignObject></g></g><g class="node default default flowchart-label" id="flowchart-grafana-14" data-node="true" data-id="grafana" transform="translate(34.5625, 57)"><rect class="basic label-container" style="" rx="0" ry="0" x="-34.5625" y="-17" width="69.125" height="34"></rect><g class="label" style="" transform="translate(-27.0625, -9.5)"><rect></rect><foreignObject width="54.125" height="19"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">grafana</span></div></foreignObject></g></g><g class="node default default flowchart-label" id="flowchart-nginx-16" data-node="true" data-id="nginx" transform="translate(301.2578125, 225)"><rect class="basic label-container" style="" rx="0" ry="0" x="-26.546875" y="-17" width="53.09375" height="34"></rect><g class="label" style="" transform="translate(-19.046875, -9.5)"><rect></rect><foreignObject width="38.09375" height="19"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">nginx</span></div></foreignObject></g></g></g></g></g></svg>
+<h3 id="production">Переменные для Production</h3>
+<p>При деплое в production замените значения в секции <code>environment</code> сервисов <code>api</code> и <code>worker</code>:</p>
+<ul>
+<li><code>VK_SECRET_KEY</code> — сгенерировать надёжный ключ</li>
+<li><code>DB_PASSWORD</code> — надёжный пароль</li>
+<li><code>MINIO_ROOT_PASSWORD</code> — надёжный пароль</li>
+<li><code>MINIO_PUBLIC_URL</code> — публичный домен MinIO</li>
+<li><code>ANALYSIS_GRPC_URL</code> — адрес gRPC анализатора</li>
+<li><code>LOG_LEVEL</code> — <code>WARNING</code> для production</li>
+</ul>
+<hr/>
+<h2 id="kubernetes-kind">Kubernetes (kind)</h2>
+<h3 id="_4">Предварительные требования</h3>
+<ul>
+<li><a href="https://kind.sigs.k8s.io/docs/user/quick-start/">kind</a></li>
+<li><a href="https://kubernetes.io/docs/tasks/tools/">kubectl</a></li>
+<li><a href="https://docs.docker.com/get-docker/">Docker</a></li>
+</ul>
+<h3 id="_5">Манифесты</h3>
+<p>Все манифесты находятся в <code>k8s/</code> (11 файлов):</p>
+<table>
+<thead>
+<tr>
+<th>Файл</th>
+<th>Ресурсы</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>00-namespace.yaml</code></td>
+<td>Namespace <code>umnaya</code></td>
+</tr>
+<tr>
+<td><code>01-configmap.yaml</code></td>
+<td>ConfigMap с конфигурацией</td>
+</tr>
+<tr>
+<td><code>02-secret.yaml</code></td>
+<td>Secret с паролями</td>
+</tr>
+<tr>
+<td><code>03-postgres.yaml</code></td>
+<td>Deployment + Service PostgreSQL</td>
+</tr>
+<tr>
+<td><code>04-minio.yaml</code></td>
+<td>Deployment + Service MinIO</td>
+</tr>
+<tr>
+<td><code>05-kafka.yaml</code></td>
+<td>Deployment + Service Kafka</td>
+</tr>
+<tr>
+<td><code>06-api-deployment.yaml</code></td>
+<td>Deployment API + init контейнеры</td>
+</tr>
+<tr>
+<td><code>07-api-service.yaml</code></td>
+<td>Service API (ClusterIP)</td>
+</tr>
+<tr>
+<td><code>08-worker-deployment.yaml</code></td>
+<td>Deployment Worker</td>
+</tr>
+<tr>
+<td><code>09-nginx.yaml</code></td>
+<td>Deployment + Service Nginx proxy</td>
+</tr>
+<tr>
+<td><code>10-volumes.yaml</code></td>
+<td>PersistentVolume + PersistentVolumeClaim</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_6">Деплой</h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-1-1" id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="c1"># Создать кластер</span>
+<a href="#__codelineno-1-2" id="__codelineno-1-2" name="__codelineno-1-2"></a>kind<span class="w"> </span>create<span class="w"> </span>cluster<span class="w"> </span>--name<span class="w"> </span>umnaya
+<a href="#__codelineno-1-3" id="__codelineno-1-3" name="__codelineno-1-3"></a>
+<a href="#__codelineno-1-4" id="__codelineno-1-4" name="__codelineno-1-4"></a><span class="c1"># Создать папки для PV на ноде</span>
+<a href="#__codelineno-1-5" id="__codelineno-1-5" name="__codelineno-1-5"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>umnaya-control-plane<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/var/lib/umnaya/<span class="o">{</span>postgres,minio,kafka<span class="o">}</span>
+<a href="#__codelineno-1-6" id="__codelineno-1-6" name="__codelineno-1-6"></a>
+<a href="#__codelineno-1-7" id="__codelineno-1-7" name="__codelineno-1-7"></a><span class="c1"># Собрать образ и загрузить в kind</span>
+<a href="#__codelineno-1-8" id="__codelineno-1-8" name="__codelineno-1-8"></a>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>umnaya-api<span class="w"> </span>.
+<a href="#__codelineno-1-9" id="__codelineno-1-9" name="__codelineno-1-9"></a>kind<span class="w"> </span>load<span class="w"> </span>docker-image<span class="w"> </span>umnaya-api<span class="w"> </span>--name<span class="w"> </span>umnaya
+<a href="#__codelineno-1-10" id="__codelineno-1-10" name="__codelineno-1-10"></a>
+<a href="#__codelineno-1-11" id="__codelineno-1-11" name="__codelineno-1-11"></a><span class="c1"># Применить манифесты</span>
+<a href="#__codelineno-1-12" id="__codelineno-1-12" name="__codelineno-1-12"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>k8s/
+<a href="#__codelineno-1-13" id="__codelineno-1-13" name="__codelineno-1-13"></a>
+<a href="#__codelineno-1-14" id="__codelineno-1-14" name="__codelineno-1-14"></a><span class="c1"># Проверить</span>
+<a href="#__codelineno-1-15" id="__codelineno-1-15" name="__codelineno-1-15"></a>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>umnaya
+<a href="#__codelineno-1-16" id="__codelineno-1-16" name="__codelineno-1-16"></a>
+<a href="#__codelineno-1-17" id="__codelineno-1-17" name="__codelineno-1-17"></a><span class="c1"># Открыть доступ к API (в отдельном терминале)</span>
+<a href="#__codelineno-1-18" id="__codelineno-1-18" name="__codelineno-1-18"></a>kubectl<span class="w"> </span>port-forward<span class="w"> </span>-n<span class="w"> </span>umnaya<span class="w"> </span>svc/api-service<span class="w"> </span><span class="m">8000</span>:8000<span class="w"> </span>--address<span class="w"> </span><span class="m">0</span>.0.0.0
+</code></pre></div>
+<h3 id="_7">Особенности</h3>
+<ul>
+<li><strong>initContainer <code>wait-postgres</code></strong>: ждёт готовности PostgreSQL перед запуском API</li>
+<li><strong>initContainer <code>alembic-upgrade</code></strong>: применяет миграции перед стартом API</li>
+<li><strong>livenessProbe</strong>: <code>GET /healthz</code> (порт 8000)</li>
+<li><strong>readinessProbe</strong>: <code>GET /readyz</code> (порт 8000)</li>
+<li><strong>PersistentVolume</strong>: hostPath <code>/var/lib/umnaya/</code></li>
+<li><strong>StorageClass</strong>: <code>manual</code> (требует предварительного создания директорий)</li>
+</ul>
+<h3 id="_8">Обновление</h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-2-1" id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="c1"># Пересобрать и загрузить образ</span>
+<a href="#__codelineno-2-2" id="__codelineno-2-2" name="__codelineno-2-2"></a>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>umnaya-api<span class="w"> </span>.
+<a href="#__codelineno-2-3" id="__codelineno-2-3" name="__codelineno-2-3"></a>kind<span class="w"> </span>load<span class="w"> </span>docker-image<span class="w"> </span>umnaya-api<span class="w"> </span>--name<span class="w"> </span>umnaya
+<a href="#__codelineno-2-4" id="__codelineno-2-4" name="__codelineno-2-4"></a>
+<a href="#__codelineno-2-5" id="__codelineno-2-5" name="__codelineno-2-5"></a><span class="c1"># Перезапустить поды (подхватят новый образ)</span>
+<a href="#__codelineno-2-6" id="__codelineno-2-6" name="__codelineno-2-6"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>pod<span class="w"> </span>-n<span class="w"> </span>umnaya<span class="w"> </span>-l<span class="w"> </span><span class="nv">app</span><span class="o">=</span>api
+<a href="#__codelineno-2-7" id="__codelineno-2-7" name="__codelineno-2-7"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>pod<span class="w"> </span>-n<span class="w"> </span>umnaya<span class="w"> </span>-l<span class="w"> </span><span class="nv">app</span><span class="o">=</span>worker
+</code></pre></div>
+<h3 id="_9">Остановка</h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-3-1" id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="c1"># Остановить все поды</span>
+<a href="#__codelineno-3-2" id="__codelineno-3-2" name="__codelineno-3-2"></a>kubectl<span class="w"> </span>scale<span class="w"> </span>deployment<span class="w"> </span>-n<span class="w"> </span>umnaya<span class="w"> </span>--all<span class="w"> </span>--replicas<span class="o">=</span><span class="m">0</span>
+<a href="#__codelineno-3-3" id="__codelineno-3-3" name="__codelineno-3-3"></a>
+<a href="#__codelineno-3-4" id="__codelineno-3-4" name="__codelineno-3-4"></a><span class="c1"># Удалить кластер</span>
+<a href="#__codelineno-3-5" id="__codelineno-3-5" name="__codelineno-3-5"></a>kind<span class="w"> </span>delete<span class="w"> </span>cluster<span class="w"> </span>--name<span class="w"> </span>umnaya
+</code></pre></div>
+<hr/>
+<h2 id="dockerfile">Dockerfile</h2>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-4-1" id="__codelineno-4-1" name="__codelineno-4-1"></a><span class="k">FROM</span><span class="w"> </span><span class="s">python:3.14-slim</span>
+<a href="#__codelineno-4-2" id="__codelineno-4-2" name="__codelineno-4-2"></a><span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app</span>
+<a href="#__codelineno-4-3" id="__codelineno-4-3" name="__codelineno-4-3"></a><span class="k">COPY</span><span class="w"> </span>requirements.txt<span class="w"> </span>.
+<a href="#__codelineno-4-4" id="__codelineno-4-4" name="__codelineno-4-4"></a><span class="k">RUN</span><span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--no-install-recommends<span class="w"> </span>g++<span class="w"> </span>gcc<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-4-5" id="__codelineno-4-5" name="__codelineno-4-5"></a><span class="w">    </span>pip<span class="w"> </span>install<span class="w"> </span>--no-cache-dir<span class="w"> </span>-r<span class="w"> </span>requirements.txt<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-4-6" id="__codelineno-4-6" name="__codelineno-4-6"></a><span class="w">    </span>apt-get<span class="w"> </span>purge<span class="w"> </span>-y<span class="w"> </span>--auto-remove<span class="w"> </span>g++<span class="w"> </span>gcc
+<a href="#__codelineno-4-7" id="__codelineno-4-7" name="__codelineno-4-7"></a><span class="k">COPY</span><span class="w"> </span>.<span class="w"> </span>.
+<a href="#__codelineno-4-8" id="__codelineno-4-8" name="__codelineno-4-8"></a><span class="k">EXPOSE</span><span class="w"> </span><span class="s">8000</span>
+<a href="#__codelineno-4-9" id="__codelineno-4-9" name="__codelineno-4-9"></a><span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">"sh"</span><span class="p">,</span><span class="w"> </span><span class="s2">"-c"</span><span class="p">,</span><span class="w"> </span><span class="s2">"alembic upgrade head &amp;&amp; exec uvicorn app.main:app --host 0.0.0.0 --port 8000"</span><span class="p">]</span>
+</code></pre></div>
+<p>Образ используется как для API (uvicorn), так и для Worker (<code>python -m app.worker</code>).</p>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+<button class="md-top md-icon" data-md-component="top" hidden="" type="button">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"></path></svg>
+  К началу
+</button>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.expand", "navigation.top", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u043d\u043e \u0432 \u0431\u0443\u0444\u0435\u0440", "clipboard.copy": "\u041a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0432 \u0431\u0443\u0444\u0435\u0440", "search.result.more.one": "\u0415\u0449\u0451 1 \u043d\u0430 \u044d\u0442\u043e\u0439 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0435", "search.result.more.other": "\u0415\u0449\u0451 # \u043d\u0430 \u044d\u0442\u043e\u0439 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0435", "search.result.none": "\u0421\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0439 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e", "search.result.one": "\u041d\u0430\u0439\u0434\u0435\u043d\u043e 1 \u0441\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0435", "search.result.other": "\u041d\u0430\u0439\u0434\u0435\u043d\u043e \u0441\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0439: #", "search.result.placeholder": "\u041d\u0430\u0447\u043d\u0438\u0442\u0435 \u043f\u0435\u0447\u0430\u0442\u0430\u0442\u044c \u0434\u043b\u044f \u043f\u043e\u0438\u0441\u043a\u0430", "search.result.term.missing": "\u041e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u0435\u0442", "select.version": "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0432\u0435\u0440\u0441\u0438\u044e"}, "version": null}</script>
+<script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+</body>
+</html>
