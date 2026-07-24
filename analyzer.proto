@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package analyzer.v1;
+
+service PhotoAnalyzer {
+  rpc AnalyzePhoto(AnalyzePhotoRequest) returns (AnalyzePhotoResponse);
+}
+
+message AnalyzePhotoRequest {
+  string photo_id = 1;
+  string object_key = 2;
+  bytes image_bytes = 3;
+}
+
+message AnalyzePhotoResponse {
+  int32 faces_count = 1;
+  bool is_blurred = 2;
+  double blur_score = 3;
+  string perceptual_hash = 4;
+  int32 eyes_closed_count = 5;
+  string dominant_color = 6;
+  repeated string tags = 7;
+  string model_version = 8;
+}
+

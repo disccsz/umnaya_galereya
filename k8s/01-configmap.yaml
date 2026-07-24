@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: umnaya-config
+  namespace: umnaya
+data:
+  ANALYSIS_GRPC_URL: "45.132.19.101:50051"
+  LOG_LEVEL: "INFO"
+  DB_ECHO: "false"
+  SERVICE_TIMEOUT: "10"
+  JWT_EXPIRE_MINUTES: "525600"
+  DB_USER: "postgres"
+  DB_NAME: "photo_analysis"
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  MINIO_ENDPOINT: "minio:9000"
+  MINIO_BUCKET_NAME: "photo-bucket"
+  MINIO_PUBLIC_URL: "jubilant-tribble-97x6qj4j7xpr2x69x-9100.app.github.dev"

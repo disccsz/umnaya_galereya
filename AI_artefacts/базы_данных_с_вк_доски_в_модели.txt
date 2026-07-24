@@ -1,0 +1,172 @@
+ПРОМПТ: 
+Сгенерируй полный код моделей SQLAlchemy ORM на основе предоставленных спецификаций таблиц: Photos, PhotoAnalysis, Tokens, Groups. Сохрани исходную структуру классов и аннотаций Mapped, исправь синтаксические ошибки типов, добавь недостающие модели-зависимости.
+
+Я хочу чтобы ты опирался на мой до этого написанный код и не менял его а подстраивался под него:
+
+import enum
+import uuid
+from datetime import datetime
+
+from sqlalchemy import Boolean, DateTime, Enum, Float, Integer, String, func
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+class PhotoStatuses(str, enum.Enum):
+    uploaded = 'uploaded'
+    pending = "pending"
+    processing = "processing"
+    done = "done"
+    failed = "failed"
+
+
+class Photos(Base):
+    __tablename__ = 'Photos'
+
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id_string: Mapped[str] = mapped_column(String(36), unique=True, nullable=False, index=True, default=lambda: str(uuid.uuid4()))
+    
+    object_key: Mapped[str] = mapped_column(string(500), nullable=False)
+    preview_key = Mapped[str] = mapped_column(String(500), nullable=True)
+
+    load_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    photo_size: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    status: Mapped[PhotoStatuses] = mapped_column(Enum(PhotoStatuses, native_enum=True), default=PhotoStatuses.uploaded, nullable=False)
+    attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+    last_error_code: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    last_error_message: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
+
+    is_private: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    
+    owner_data_token: Mapped[Optional[str]] = mapped_column(
+        String, 
+        ForeignKey("tokens.data_token"), 
+        nullable=True,
+        index=True
+    )
+
+    duplicate_group_id: Mapped[Optional[int]] = mapped_column(
+        Integer, 
+        ForeignKey("groups.id"), 
+        nullable=True,
+        index=True
+    )
+
+    identity_photo_group_id: Mapped[Optional[int]] = mapped_column(
+        Integer, 
+        ForeignKey("groups.id"), 
+        nullable=True,
+        index=True
+    )
+
+    owner_token_rel = relationship(
+        "Token", back_populates="photos", foreign_keys=[owner_data_token]
+    )
+    
+    # Связь с группой дубликатов
+    duplicate_group_rel = relationship(
+        "Group", back_populates="duplicate_photos", foreign_keys=[duplicate_group_id]
+    )
+    
+    # Связь с группой идентичных фото
+    identity_group_rel = relationship(
+        "Group", back_populates="identity_photos", foreign_keys=[identity_photo_group_id]
+    )
+
+class PhotoAnalysis(Base):
+    __tablename__ = "photo_analysis"
+
+    # 1. Связь с фото (1 к 1)
+    # photo_id является и Primary Key этой таблицы, и Foreign Key на photos.id
+    # Это гарантирует, что у одного фото может быть только одна запись анализа
+    photo_id: Mapped[int] = mapped_column(
+        Integer, 
+        ForeignKey("photos.id"), 
+        primary_key=True
+    )
+
+    # 2. Метрики лиц (могут быть NULL до анализа)
+    faces_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    eyes_closed_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
+    # 3. Метрики качества (могут быть NULL до анализа)
+    is_blurred: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    
+    # Для значений 0-255 лучше использовать SmallInteger (экономит место), 
+    # но Integer тоже ок. Главное - nullable=True
+    blur_score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    quality_metric: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    light_level: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
+    # 4. Хэши для поиска дубликатов
+    # perceptual_hash (pHash) - обычно 16-64 символа (hex)
+    perceptual_hash: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, index=True)
+    
+    # sha256_hash - всегда 64 символа (hex)
+    sha256_hash: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, index=True)
+
+    # 5. Время завершения анализа
+    # Заполняется ТОЛЬКО когда анализ успешно завершен
+    analysis_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), 
+        nullable=True
+    )
+
+    # --- Relationship ---
+    # Позволяет писать: photo.analysis.faces_count
+    # uselist=False означает связь "один к одному", вернется один объект, а не список
+    photo = relationship("Photo", back_populates="analysis", uselist=False)
+
+Спецификации таблиц:
+
+
+"Photos"
+"id","integer","primary key"
+"id_string","string","UUID фото (защита от подбора приватных фото) "
+"object_key","string","Ключ фотки в MinIO (ссылка на объект)"
+"load_time","TIMESTAMP","Timestapmt загрузки фотографии пользователем"
+"photo_size","BIGINT","Вес фото в байтах"
+"previev_key","string","Ключ превью (уменьшеного сжатого изображения) фотки в MinIO (ссылка на объект)"
+"status","string","Текущий статус фото из списка состояний"
+"attempts","int","Количество совершенных попыток анализа (по умолчанию - 0)"
+"last_error_code","int","Код последней ошибки анализатора"
+"last_error_message","string",""
+"is_private","boolean","Флаг T/F загружена ли фото через авторизованное Vk Mini App (для привязки к владельцу)"
+"owner_data_token","string","токен пользотваля который загрузил фото связан с tokens.data_token"
+"dublicate_group_id ","int","id группы дубликатов в которую входит фотка связан с groups.id"
+"identity_photo_group_id","int","id группы идентичных фото в которую входит фотка groups.id"
+
+
+"analysis_rezult"
+"photo_id","integer","primary key связан с photos.id"
+"faces_count","integer","Количество обнаруженных лиц на фото"
+"eyes_closed_count","integer","Количество закрытых глаз"
+"is_blurred","boolean","Флаг T/F смазано ли фото"
+"blur_score","int","Степень размытия (0-255)"
+"quality_metric","int","Вычисленная метрика качества и ""удачности"" фото (0-255)"
+"light_level","int","0-255 степень освещенности"
+"perceptual_hash","string","phash картинки для оценки похожести"
+"sha256_hash","string","хэш картинки для поиска идентичных дубликатов"
+"analysis_at","TIMESTAMP","Время завершения анализа фото"
+
+"Tokens"
+"auth_token","string","primary key"
+"vk_owner_user_id","string","вк айди владельца токена"
+"created_at_time","TIMESTAMP","время в которое был выпущен токен"
+"expires_at","TIMESTAMP","Время истечения срока действия"
+"data_token","string","Постоянный токен пользователя для доступа и именования данных внутри приложения"
+
+"Dublicate Groups"
+"id","integer","primary key"
+"created_at","integer","Timestamp создания группы"
+"is_identity_group","boolean","Содержит ли группа идентичные дубликаты"
+"id_string","string","Безопасный id группы"
+"owner_data_token","string","Ключ владельца группы связан с tokens.data_token (по умолчанию None)"
+"is_private","boolean","Флаг T/F создана ли группа приватных фото (для привязки к владельцу)"
+"standart_hash","string","Хэш  с которым сравниваются все остальные фото (по умолчанию None)"

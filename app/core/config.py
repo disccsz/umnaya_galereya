@@ -1,0 +1,44 @@
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+class Settings(BaseSettings):
+    # --- PostgreSQL ---
+    DB_USER: str
+    DB_PASSWORD: str
+    DB_HOST: str
+    DB_PORT: int
+    DB_NAME: str
+
+    # --- MinIO ---
+    MINIO_ENDPOINT: str
+    MINIO_ROOT_USER: str
+    MINIO_ROOT_PASSWORD: str
+    MINIO_BUCKET_NAME: str
+    MINIO_PUBLIC_URL: str = ""
+
+    # --- Kafka ---
+    KAFKA_BOOTSTRAP_SERVERS: str
+
+    # --- Analyzer gRPC ---
+    ANALYSIS_GRPC_URL: str = "45.132.19.101:50051"
+
+    # --- Logging ---
+    LOG_LEVEL: str = "INFO"
+    DB_ECHO: bool = False
+
+    SERVICE_TIMEOUT: int
+
+    # --- VK Auth ---
+    VK_SECRET_KEY: str
+    JWT_EXPIRE_MINUTES: int = 525600
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
+
+    @property
+    def database_url(self) -> str:
+        return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+
+settings = Settings()

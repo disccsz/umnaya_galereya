@@ -1,0 +1,165 @@
+import uuid
+import logging
+import json
+from app.integrations.kafka import KafkaProducer, TOPIC_PHOTO_UPLOADED
+
+from typing import List
+from fastapi import UploadFile
+
+from app.integrations.postgreesql import PhotoDatabase
+from app.integrations.minio import MinIOStorage
+from app.database.models import Photos, PhotoStatuses
+from app.schemas.photos import PhotoItem
+from app.core.errors import PhotoNotFoundError, InvalidFile, FileTooLarge
+from app.core.metrics import photos_uploaded_total
+
+
+logger = logging.getLogger(__name__)
+
+
+class PhotoService:
+    def __init__(self, database: PhotoDatabase, storage: MinIOStorage, kafka: KafkaProducer | None = None) -> None:
+        self._database = database
+        self._storage = storage
+        self._kafka = kafka
+
+    async def create_photo(self, file: UploadFile, owner_data_token: str | None = None) -> Photos:
+        MAX_SIZE = 3 * 1024 * 1024
+        if file.size and file.size > MAX_SIZE:
+            logger.warning("File too large by header: %s", file.size)
+            raise FileTooLarge(size=file.size)
+        if file.content_type not in ['image/jpeg', 'image/png', 'image/jpg']:
+            logger.warning("Invalid file type: %s", file.content_type)
+            raise InvalidFile(content_type=file.content_type)
+
+        data = await file.read(MAX_SIZE + 1)
+        if len(data) > MAX_SIZE:
+            logger.warning("File too large: %s", len(data))
+            raise FileTooLarge(size=len(data))
+
+        _MAGIC = {
+            "image/jpeg": (b"\xff\xd8\xff",),
+            "image/png":  (b"\x89PNG\r\n\x1a\n",),
+            "image/jpg":  (b"\xff\xd8\xff",),
+        }
+        if not data.startswith(_MAGIC[file.content_type]):
+            logger.warning("File content does not match declared type: %s", file.content_type)
+            raise InvalidFile(content_type=file.content_type)
+
+        _EXT = {"image/jpeg": "jpg", "image/png": "png", "image/jpg": "jpg"}
+        photo_id = f"p_{uuid.uuid4().hex[:12]}"
+        object_key = f"photos/{photo_id}/original.{_EXT[file.content_type]}"
+
+        photo = Photos(
+            id_string=photo_id, object_key=object_key,
+            photo_size=len(data), status=PhotoStatuses.uploading,
+            owner_data_token=owner_data_token,
+            is_private=owner_data_token is not None,
+        )
+
+        
+
+        photo = await self._database.create(photo)
+        await self._storage.add_photo(object_key, data, file.content_type or "application/octet-stream")
+        photo = await self._database.update_status(photo_id=photo.id, status=PhotoStatuses.pending)
+
+        if self._kafka:
+            await self._kafka.send(
+                topic=TOPIC_PHOTO_UPLOADED,
+                key=photo_id.encode(),
+                value=json.dumps({"photo_id": photo_id, "object_key": object_key}).encode(),
+            )
+
+        
+
+
+        logger.info(
+            "Photo created: id=%s, size=%s", photo.id_string, len(data),
+        )
+        photos_uploaded_total.inc()
+        return photo
+
+    async def list_photos(self, owner_data_token: str | None = None) -> List[PhotoItem]:
+        photos = await self._database.list(owner_data_token=owner_data_token)
+        response = []
+
+        for photo in photos:
+            if photo.status != PhotoStatuses.uploading:
+                photo_data = {
+                    'photo_id': photo.id_string,
+                    'status': photo.status,
+                    'created_at': photo.load_time,
+                }
+
+                group_ids = []
+                if photo.duplicate_group_rel:
+                    group_ids.append(photo.duplicate_group_rel.id_string)
+                if photo.identity_group_rel:
+                    group_ids.append(photo.identity_group_rel.id_string)
+                if group_ids:
+                    photo_data['groups_ids'] = group_ids
+
+                original_photo_url = await self._storage.get_presigned_url(
+                    object_key=photo.object_key,
+                )
+                photo_data['original_image_url'] = original_photo_url
+                if photo.preview_key:
+                    preview_photo_url = await self._storage.get_presigned_url(
+                        object_key=photo.preview_key,
+                    )
+                    photo_data['preview_image_url'] = preview_photo_url
+                response.append(photo_data)
+
+        logger.info("Photos listed: count=%s", len(response))
+        return response
+
+    async def get_photo_by_id(self, string_id: str, owner_data_token: str | None = None) -> Photos:
+        photo = await self._database.get_photo_by_id(string_id=string_id, owner_data_token=owner_data_token)
+
+        if not photo:
+            logger.info("Photo not found: %s", string_id)
+            raise PhotoNotFoundError(photo_id=string_id)
+
+        photo_data = {
+            'photo_id': photo.id_string,
+            'status': photo.status,
+            'created_at': photo.load_time,
+        }
+
+        if photo.analysis:
+            photo_data['faces_count'] = photo.analysis.faces_count
+            photo_data['eyes_closed_count'] = photo.analysis.eyes_closed_count
+            photo_data['is_blurred'] = photo.analysis.is_blurred
+            photo_data['blur_score'] = photo.analysis.blur_score
+            photo_data['quality_metric'] = photo.analysis.quality_metric
+            photo_data['tags'] = json.loads(photo.analysis.tags) if photo.analysis.tags else None
+
+        if photo.duplicate_group_rel:
+            photo_data['duplicate_group_id'] = photo.duplicate_group_rel.id_string
+        if photo.identity_group_rel:
+            photo_data['identity_group_id'] = photo.identity_group_rel.id_string
+
+        return photo_data
+
+    async def get_photo_content_by_id(self, string_id: str, owner_data_token: str | None = None) -> Photos:
+        photo = await self._database.get_photo_by_id(string_id=string_id, owner_data_token=owner_data_token)
+        if not photo:
+            logger.info("Photo not found: %s", string_id)
+            raise PhotoNotFoundError(photo_id=string_id)
+
+        original_photo_url, preview_photo_url = None, None
+        if photo.object_key:
+            original_photo_url = await self._storage.get_presigned_url(
+                object_key=photo.object_key,
+            )
+            if photo.preview_key:
+                preview_photo_url = await self._storage.get_presigned_url(
+                    object_key=photo.preview_key,
+                )
+
+        photo_data = {
+            'photo_id': photo.id_string,
+            'image_preview_url': preview_photo_url,
+            'image_url': original_photo_url,
+        }
+        return photo_data
